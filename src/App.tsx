@@ -4,6 +4,7 @@ import {Button, Layout, Menu, theme} from 'antd';
 import {BrowserRouter as Router, Link, Route, Routes} from 'react-router-dom';
 import './App.css'
 import navConfig, {NavItem} from './navConfig';
+import './config/websocket'
 
 const {Header, Sider, Content} = Layout;
 

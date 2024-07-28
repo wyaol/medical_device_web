@@ -1,7 +1,8 @@
 // src/navConfig.ts
-import {LineChartOutlined, BarChartOutlined} from '@ant-design/icons';
+import {LineChartOutlined, BarChartOutlined, SettingOutlined} from '@ant-design/icons';
 import PlusWaveRealTimeData from "./pages/PlusWaveRealTimeData";
 import HeartRateRealTimeData from "./pages/HeartRateRealTimeData";
+import DeviceManagement from "./pages/DeviceManagement";
 
 export interface NavItem {
   key: string;
@@ -39,6 +40,13 @@ const navConfig: NavItem[] = [
     name: '分析报告',
     icon: <BarChartOutlined />,
     children: [],
+  },
+    {
+    key: '3',
+    path: '/device-management',
+    name: '设备管理',
+    icon: <SettingOutlined />,
+    element: <DeviceManagement/>,
   },
 ];
 
