@@ -172,9 +172,10 @@ const CO2WaveformRealData: React.FC = () => {
 
   return (
     <div style={{ display: "flex", flexDirection: "column" }}>
-      <div style={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
-        <Button onClick={() => co2_start()}>开始</Button>
-        <Button onClick={() => co2_stop()}>停止</Button>
+      <div style={{ display: "flex", justifyContent: "flex-start", alignItems: "center" }}>
+        <Button onClick={() => co2_start()} >开始采集</Button>
+        <Button onClick={() => co2_stop()} style={{ marginLeft: '10px' }}>停止采集</Button>
+        <Button type="primary" onClick={() => {}} style={{ marginLeft: '50px'}}>设备扫描</Button>
       </div>
       <div style={{ width: "100%", display: "flex" }}>
         <div style={{ width: "50%" }}>
