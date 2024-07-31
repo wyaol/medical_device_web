@@ -3,6 +3,7 @@ import {LineChartOutlined, BarChartOutlined, SettingOutlined} from '@ant-design/
 import PlusWaveRealTimeData from "./pages/PlusWaveRealTimeData";
 import HeartRateRealTimeData from "./pages/HeartRateRealTimeData";
 import DeviceManagement from "./pages/DeviceManagement";
+import CO2WaveformRealData from './pages/Co2WaveformRealTimeData';
 
 export interface NavItem {
   key: string;
@@ -32,6 +33,12 @@ const navConfig: NavItem[] = [
         name: '心率',
         element: <HeartRateRealTimeData/>,
       },
+      {
+        key: '1-3',
+        path: '/real-time-data/co2-waveform',
+        name: 'CO2',
+        element: <CO2WaveformRealData/>,
+      }
     ],
   },
     {
