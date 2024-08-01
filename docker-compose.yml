@@ -8,8 +8,8 @@ services:
     environment:
       - MEDICAL_DEVICE_SERVICE_HOST=medical_device_service
       - MEDICAL_DEVICE_SERVICE_PORT=5000
-      - GATEWAT_WBEBSOCKT_HOST=medical_device_gateway
-      - GATEWAT_WBEBSOCKT_PORT=8765
+      - REACT_APP_GATEWAT_WBEBSOCKT_HOST=medical_device_gateway
+      - REACT_APP_GATEWAT_WBEBSOCKT_PORT=8765
     command: npm run start
     networks:
       - medical_device
