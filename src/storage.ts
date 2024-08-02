@@ -1,4 +1,4 @@
-interface Storage {
+export interface Storage {
     deviceId: string
     plusWave: {
         connect: {
