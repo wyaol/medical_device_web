@@ -35,7 +35,6 @@ const storage: Storage = {
       'microcirculation': new Array(len).fill(0),
       'oxygen_saturation': new Array(len).fill(0),
     }
-  }
 }
 
 export default storage
