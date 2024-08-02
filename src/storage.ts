@@ -10,7 +10,7 @@ export interface Storage {
 }
 
 const storage: Storage = {
-    deviceId: "190070690681122",
+    deviceId: "59914161336601",
     plusWave: {
         connect: {
             success: false,

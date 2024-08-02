@@ -13,9 +13,11 @@ const WebSocketComponent = () => {
     };
 
     socket.onmessage = (event) => {
+      console.log(event);
       const data = JSON.parse(event.data);
       switch (data.event) {
         case 'plus_wave_bluetooth_list':
+          console.log(data.data);
           setGlobalState((prevState: Storage) => ({
             ...prevState,
             plusWave: {
@@ -49,10 +51,7 @@ const WebSocketComponent = () => {
   }, []); // Empty dependency array ensures this effect runs only once
 
   return (
-    <div>
-      <h2>WebSocket Component</h2>
-      {/* Render your WebSocket-related content here */}
-    </div>
+    <div></div>
   );
 };
 

@@ -23,7 +23,7 @@ module.exports = function(app) {
   app.use(
     '/api',
     createProxyMiddleware({
-      target: `http://${process.env.MEDICAL_DEVICE_SERVICE_HOST}:${process.env.MEDICAL_DEVICE_SERVICE_PORT}`,
+      target: `http://${process.env.REACT_APP_MEDICAL_DEVICE_SERVICE_HOST}:${process.env.REACT_APP_MEDICAL_DEVICE_SERVICE_PORT}`,
       changeOrigin: true,
       // pathRewrite: {
       //   '^/api': '', // 去掉 /api 前缀
