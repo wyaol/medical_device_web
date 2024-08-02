@@ -3,7 +3,7 @@ import {LineChartOutlined, BarChartOutlined, SettingOutlined} from '@ant-design/
 import PlusWaveRealTimeData from "./pages/PlusWaveRealTimeData";
 import HeartRateRealTimeData from "./pages/HeartRateRealTimeData";
 import DeviceManagement from "./pages/DeviceManagement";
-import CO2WaveformRealData from './pages/Co2WaveformRealTimeData';
+import CO2WaveformRealData from './pages/Co2WaveformRealData';
 
 export interface NavItem {
   key: string;
