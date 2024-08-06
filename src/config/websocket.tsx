@@ -6,6 +6,7 @@ const WebSocketComponent = () => {
   const { globalState, setGlobalState } = useGlobalState();
 
   useEffect(() => {
+
     const socket = new WebSocket(`ws://${process.env.REACT_APP_GATEWAT_WBEBSOCKT_HOST}:${process.env.REACT_APP_GATEWAT_WBEBSOCKT_PORT}`);
 
     socket.onopen = () => {
@@ -13,11 +14,9 @@ const WebSocketComponent = () => {
     };
 
     socket.onmessage = (event) => {
-      console.log(event);
       const data = JSON.parse(event.data);
       switch (data.event) {
         case 'plus_wave_bluetooth_list':
-          console.log(data.data);
           setGlobalState((prevState: Storage) => ({
             ...prevState,
             plusWave: {
@@ -35,6 +34,26 @@ const WebSocketComponent = () => {
             }
           }));
           break;
+        case 'plus_wave_data_upload':
+          const deviceData = data.data;
+          const newData = globalState.plusWave.data;
+
+          Object.keys(newData).forEach((key: string) => {
+            if (deviceData[key] !== 0) {
+              newData[key] = [...newData[key].slice(1), deviceData[key]];
+            } else {
+              newData[key] = [...newData[key].slice(1), newData[key][newData[key].length - 1]];
+            }
+          })
+
+          setGlobalState((prevState: Storage) => ({
+            ...prevState,
+            plusWave: {
+              ...prevState.plusWave,
+              data: newData
+            }
+          }));
+          break;
         default:
           console.log(data.event);
       }
@@ -43,6 +62,7 @@ const WebSocketComponent = () => {
     socket.onclose = () => {
       console.log('WebSocket connection closed');
     };
+
 
     // Cleanup WebSocket on unmount or dependencies change
     return () => {
