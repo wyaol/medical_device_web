@@ -3,6 +3,7 @@ import {LineChartOutlined, BarChartOutlined, SettingOutlined} from '@ant-design/
 import PlusWaveRealTimeData from "./pages/PlusWaveRealTimeData";
 import HeartRateRealTimeData from "./pages/HeartRateRealTimeData";
 import DeviceManagement from "./pages/DeviceManagement";
+import PlusWaveReport from './pages/PlusWaveReport';
 
 export interface NavItem {
   key: string;
@@ -39,7 +40,14 @@ const navConfig: NavItem[] = [
     path: '/analyse-report',
     name: '分析报告',
     icon: <BarChartOutlined />,
-    children: [],
+    children: [
+      {
+        key: '2-1',
+        path: '/analyse-report/plus-wave',
+        name: '脉搏波',
+        element: <PlusWaveReport/>,
+      },
+    ],
   },
     {
     key: '3',

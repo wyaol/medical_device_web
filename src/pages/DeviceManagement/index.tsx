@@ -4,6 +4,7 @@ import storage from '../../storage';
 import request from '../../config/request';
 import { AxiosResponse } from 'axios';
 import { useGlobalState } from '../../config/GlobalStateContext';
+import { connectPlusWaveDevice, startDataCollector, stopDataCollector } from '../../service/plusWaveService';
 
 const DeviceManagement: React.FC = () => {
   const [connected, setConnected] = useState(false);
@@ -54,26 +55,20 @@ const DeviceManagement: React.FC = () => {
 
   const connect = (address: string) => {
     setConnectLoading(true);
-    request.post(`/plus_wave/devices/${storage.deviceId}/connect`, { uuid: address })
-      .then((res: AxiosResponse<any>) => {
-        if (res.status !== 200) {
-          throw new Error('Connection failed');
-        }
-      })
-      .catch((err) => {
+    connectPlusWaveDevice(storage.deviceId, address).catch((err: any) => {
         setConnectLoading(false);
         setError(err.message);
       });
   };
 
   const start = () => {
-    request.post(`/plus_wave/devices/${storage.deviceId}/start`).then(() => {
+    startDataCollector(storage.deviceId).then(() => {
       console.log('start');
     })
   }
 
   const stop = () => {
-    request.post(`/plus_wave/devices/${storage.deviceId}/stop`).then(() => {
+    stopDataCollector(storage.deviceId).then(() => {
       console.log('stop');
     })
   }
