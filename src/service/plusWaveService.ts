@@ -16,3 +16,20 @@ export const stopDataCollector = async (deviceId: string) => {
     await request.post(`/plus_wave/devices/${deviceId}/stop`);
 }
 
+export const createPatient = async (patient: Record<string, any>) => {
+    await request.post(`/plus_wave/patients`, patient);
+}
+
+export const getAllPatient = async () => {
+    return await request.get(`/plus_wave/patients`).then(res => res.data.data);
+}
+
+export const bindPatient = async (patientId: string) => {
+    return await request.post(`/plus_wave/current_patient`, {
+        'patient_id': patientId
+    }).then(res => res.data.data);
+}
+
+export const getCurrentPatient = async () => {
+    return await request.get(`/plus_wave/current_patient`).then(res => res.data.data);
+}
