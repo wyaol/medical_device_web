@@ -24,12 +24,9 @@ export const getAllPatient = async () => {
     return await request.get(`/plus_wave/patients`).then(res => res.data.data);
 }
 
-export const bindPatient = async (patientId: string) => {
+export const bindPatient = async (patientId: string, deviceid: string) => {
     return await request.post(`/plus_wave/current_patient`, {
-        'patient_id': patientId
+        'patient_id': patientId,
+        'device_id': deviceid,
     }).then(res => res.data.data);
-}
-
-export const getCurrentPatient = async () => {
-    return await request.get(`/plus_wave/current_patient`).then(res => res.data.data);
 }

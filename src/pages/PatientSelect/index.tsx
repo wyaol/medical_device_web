@@ -1,11 +1,13 @@
-import React, { useState, useEffect } from 'react';
-import { Select, Button, message, Card } from 'antd';
-import axios from 'axios';
-import { bindPatient, getAllPatient, getCurrentPatient } from '../../service/plusWaveService';
+import { Button, Card, message, Select } from 'antd';
+import { useEffect, useState } from 'react';
+import { useGlobalState } from '../../config/GlobalStateContext';
+import { bindPatient, getAllPatient } from '../../service/plusWaveService';
+import { getCurrentPatient } from '../../utils';
 
 const { Option } = Select;
 
 const PatientSelect = () => {
+  const { globalState, setGlobalState } = useGlobalState();
   const [patients, setPatients] = useState<Record<string, any>[]>([]);
   const [selectedPatient, setSelectedPatient] = useState<string | null>(null);
   const [patientInfo, setPatientInfo] = useState<Record<string, any> | null>(null);
@@ -13,9 +15,7 @@ const PatientSelect = () => {
   useEffect(() => {
     // 加载所有病人列表
     fetchPatients();
-    getCurrentPatient().then(patient => {
-      setPatientInfo(patient);
-    });
+    setPatientInfo(getCurrentPatient());
   }, []);
 
   const fetchPatients = async () => {
@@ -42,8 +42,7 @@ const PatientSelect = () => {
     }
 
     try {
-      const patient = await bindPatient(selectedPatient);
-
+      const patient = await bindPatient(selectedPatient, globalState.deviceId);
       // 处理成功响应
       setPatientInfo(patient);
       message.success('选择病人成功！');
