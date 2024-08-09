@@ -7,7 +7,7 @@ import { getCurrentPatient } from '../../utils';
 const { Option } = Select;
 
 const PatientSelect = () => {
-  const { globalState, setGlobalState } = useGlobalState();
+  const { globalState } = useGlobalState();
   const [patients, setPatients] = useState<Record<string, any>[]>([]);
   const [selectedPatient, setSelectedPatient] = useState<string | null>(null);
   const [patientInfo, setPatientInfo] = useState<Record<string, any> | null>(null);

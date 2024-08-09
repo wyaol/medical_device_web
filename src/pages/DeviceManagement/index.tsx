@@ -18,7 +18,7 @@ const DeviceManagement: React.FC = () => {
   useEffect(() => {
     setBluetooth(globalState.plusWave.bluetooth);
     setConnected(globalState.plusWave.connect.success);
-  }, [])
+  }, [globalState.plusWave.bluetooth, globalState.plusWave.connect.success])
 
   useEffect(() => {
     setBluetooth(globalState.plusWave.bluetooth);
@@ -79,7 +79,7 @@ const DeviceManagement: React.FC = () => {
 
   const stop = () => {
     const nowTime = new Date();
-    stopDataCollector(storage.deviceId, globalState.dataCollectionPeriod.startTime, globalState.dataCollectionPeriod.endTime).then(() => {
+    stopDataCollector(storage.deviceId, globalState.dataCollectionPeriod.startTime, nowTime).then(() => {
       setGlobalState({
         ...globalState,
         dataCollectionPeriod: {
