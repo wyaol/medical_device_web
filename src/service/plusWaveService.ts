@@ -1,5 +1,6 @@
 import { AxiosResponse } from "axios";
 import request from "../config/request";
+import { getCurrentPatient } from "../utils";
 
 export const connectPlusWaveDevice = async (deviceId: string, address: string) => {
     const res = await request.post(`/plus_wave/devices/${deviceId}/connect`, { uuid: address });
@@ -9,11 +10,18 @@ export const connectPlusWaveDevice = async (deviceId: string, address: string) =
 }
 
 export const startDataCollector = async (deviceId: string) => {
-    await request.post(`/plus_wave/devices/${deviceId}/start`);
+    if (getCurrentPatient()) {
+        await request.post(`/plus_wave/devices/${deviceId}/start`);
+    } else {
+        throw new Error('请绑定病人');
+    }
 }
 
-export const stopDataCollector = async (deviceId: string) => {
-    await request.post(`/plus_wave/devices/${deviceId}/stop`);
+export const stopDataCollector = async (deviceId: string, startTime: Date | null, endTime: Date | null) => {
+    await request.post(`/plus_wave/devices/${deviceId}/stop`, {
+        'start_time': startTime,
+        'end_time': endTime
+    });
 }
 
 export const createPatient = async (patient: Record<string, any>) => {

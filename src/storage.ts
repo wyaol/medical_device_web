@@ -1,4 +1,8 @@
 export interface Storage {
+  dataCollectionPeriod: {
+    startTime: Date | null,
+    endTime: Date | null,
+  }
   deviceId: string
   plusWave: {
     connect: {
@@ -13,6 +17,10 @@ export interface Storage {
 const len = 20
 
 const storage: Storage = {
+  dataCollectionPeriod: {
+    startTime: null,
+    endTime: null,
+  },
   deviceId: "59914161336601",
   plusWave: {
     connect: {

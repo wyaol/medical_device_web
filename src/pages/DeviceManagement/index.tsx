@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Button, Card, Col, Row, Space, Spin, Tag, Alert } from 'antd';
+import { Button, Card, Col, Row, Space, Spin, Tag, Alert, message } from 'antd';
 import storage from '../../storage';
 import request from '../../config/request';
 import { AxiosResponse } from 'axios';
@@ -62,14 +62,34 @@ const DeviceManagement: React.FC = () => {
   };
 
   const start = () => {
+    const nowTime = new Date();
     startDataCollector(storage.deviceId).then(() => {
-      console.log('start');
+      setGlobalState({
+        ...globalState,
+        dataCollectionPeriod: {
+          ...globalState.dataCollectionPeriod,
+          startTime: nowTime
+        }
+      })
+      message.success('开始采集');
+    }).catch((error: Error) => {
+      message.error(error.message);
     })
   }
 
   const stop = () => {
-    stopDataCollector(storage.deviceId).then(() => {
-      console.log('stop');
+    const nowTime = new Date();
+    stopDataCollector(storage.deviceId, globalState.dataCollectionPeriod.startTime, globalState.dataCollectionPeriod.endTime).then(() => {
+      setGlobalState({
+        ...globalState,
+        dataCollectionPeriod: {
+          ...globalState.dataCollectionPeriod,
+          endTime: nowTime
+        }
+      })
+      message.success('停止采集');
+    }).catch((error: Error) => {
+      message.error(error.message);
     })
   }
 
