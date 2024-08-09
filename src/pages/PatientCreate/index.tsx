@@ -1,6 +1,4 @@
-import React from 'react';
-import { Form, Input, Button, message } from 'antd';
-import axios from 'axios';
+import { Button, Form, Input, message } from 'antd';
 import { createPatient } from '../../service/plusWaveService';
 
 const layout = {

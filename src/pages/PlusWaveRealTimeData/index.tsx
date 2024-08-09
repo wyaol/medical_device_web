@@ -1,5 +1,5 @@
-import React, { useEffect, useRef, useState } from 'react';
 import ReactEcharts from "echarts-for-react";
+import { useEffect, useRef } from 'react';
 import { useGlobalState } from '../../config/GlobalStateContext';
 
 

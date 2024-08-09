@@ -2,6 +2,8 @@
   "name": "medical_device_web",
   "version": "0.1.0",
   "private": true,
+  "main": "main.js",
+  "homepage": ".",
   "dependencies": {
     "@ant-design/icons": "^5.4.0",
     "@testing-library/jest-dom": "^5.17.0",
@@ -29,7 +31,9 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "electron-start": "electron .",
+    "package": "electron-packager ./build medical_device --all --out ./packages"
   },
   "eslintConfig": {
     "extends": [
@@ -48,5 +52,9 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "electron": "^31.3.1",
+    "electron-packager": "^17.1.2"
   }
 }
