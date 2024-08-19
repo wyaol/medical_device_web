@@ -57,3 +57,17 @@ export const getRRIntervals = async (periodId: number|null) => {
   const response = await request.get(`/plus_wave/data_collection_periods/${periodId}/rr_intervals`).then(res => res.data.data);
   return response;
 }
+
+export const getMetrics = async (periodId: number|null) => {
+  if (!periodId) throw new Error('请选择时间区间');
+  const response = await request.get(`/plus_wave/data_collection_periods/${periodId}/metrics`).then(res => res.data.data);
+  return response;
+}
+
+export const getTrend = async (periodId: number|null, timeInterval: number) => {
+  if (!periodId) throw new Error('请选择时间区间');
+  const response = await request.post(`/plus_wave/data_collection_periods/${periodId}/trend`, {
+    'time_interval': timeInterval
+  }).then(res => res.data.data);
+  return response;
+}

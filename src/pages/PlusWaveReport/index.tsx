@@ -2,10 +2,12 @@ import { Button, message, Select } from 'antd';
 import React, { useEffect, useState, useCallback } from 'react';
 import { getAllDataCollectionPeriods, getRRIntervals } from '../../service/plusWaveService';
 import './index.css';
+import PlusWaveMetrics from '../../components/PlusWaveMetrics';
 
 const PlusWaveReport = () => {
   const [dataCollectionPeriods, setDataCollectionPeriods] = useState([]);
   const [periodId, setPeriodId] = useState<number | null>(null);
+  const [periodIdToGenReport, setPeriodIdToGenReport] = useState<number | null>(null);
   const [rrIntervals, setRrIntervals] = useState<number[]>([]);
 
   useEffect(() => {
@@ -31,6 +33,8 @@ const PlusWaveReport = () => {
       .catch((error: Error) => {
         message.error('生成报告失败: ' + error.message);
       });
+
+    setPeriodIdToGenReport(periodId);
   }, [periodId]);
 
   return (
@@ -50,20 +54,25 @@ const PlusWaveReport = () => {
       <Button type="primary" onClick={genReport} className="generate-report-button">
         生成报告
       </Button>
-      <div className="report-box">
-        <div className="report-title">心跳间隔</div>
-        <div className="report-results">
-          {rrIntervals.length > 0 ? (
-            rrIntervals.map((rrInterval, index) => (
-              <div key={index} className="interval-item">
-                {Math.round(rrInterval)}
-              </div>
-            ))
-          ) : (
-            <div className="no-data">暂无数据</div>
-          )}
+      {periodIdToGenReport && <div>
+        <div className="report-box">
+          <div className="report-title">心跳间隔</div>
+          <div className="report-results">
+            {rrIntervals.length > 0 ? (
+              rrIntervals.map((rrInterval, index) => (
+                <div key={index} className="interval-item">
+                  {Math.round(rrInterval)}
+                </div>
+              ))
+            ) : (
+              <div className="no-data">暂无数据</div>
+            )}
+          </div>
         </div>
-      </div>
+        <div className="report-box">
+          <PlusWaveMetrics periodId={periodId} />
+        </div>
+      </div>}
     </div>
   );
 };
