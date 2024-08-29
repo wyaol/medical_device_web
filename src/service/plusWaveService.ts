@@ -55,7 +55,11 @@ export const getAllDataCollectionPeriods = async () => {
 export const getRRIntervals = async (periodId: number|null) => {
   if (!periodId) throw new Error('请选择时间区间');
   const response = await request.get(`/plus_wave/data_collection_periods/${periodId}/rr_intervals`).then(res => res.data.data);
-  return response;
+  return {
+    rrIntervals: response['rr_intervals'],
+    rrIntervalsAvarage: response['rr_intervals_average'],
+    rrIntervalsIntervals: response['rr_intervals_intervals'],
+  };
 }
 
 export const getMetrics = async (periodId: number|null) => {

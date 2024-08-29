@@ -38,17 +38,29 @@
   }
   
   .interval-item {
-    padding: 10px;
-    background-color: #fff;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
-    width: 60px;
+    /* padding: 10px; */
+    /* background-color: #fff; */
+    /* border: 1px solid #ccc; */
+    /* border-radius: 4px; */
+    /* box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1); */
+    /* width: 60px; */
     text-align: center;
   }
   
   .no-data {
     color: #888;
     padding: 10px;
+  }
+
+  .intervals-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    height: 320px;
+  }
+
+  .intervals-container > div {
+    width: 30%;
   }
   
