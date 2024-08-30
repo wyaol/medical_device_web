@@ -75,3 +75,9 @@ export const getTrend = async (periodId: number|null, timeInterval: number) => {
   }).then(res => res.data.data);
   return response;
 }
+
+export const getTimeDomainMetrics = async (periodId: number|null) => {
+  if (!periodId) throw new Error('请选择时间区间');
+  const response = await request.post(`/plus_wave/data_collection_periods/${periodId}/time_domain`).then(res => res.data.data);
+  return response;
+}

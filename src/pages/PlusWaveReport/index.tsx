@@ -1,9 +1,10 @@
 import { Button, message, Select } from 'antd';
 import React, { useEffect, useState, useCallback } from 'react';
-import { getAllDataCollectionPeriods, getRRIntervals } from '../../service/plusWaveService';
+import { getAllDataCollectionPeriods, getRRIntervals, getTimeDomainMetrics } from '../../service/plusWaveService';
 import './index.css';
 import PlusWaveMetrics from '../../components/PlusWaveMetrics';
 import RRIntervals from '../../components/RRIntervals';
+import HeartRateVariabilityTimeDomainMetrics from '../../components/HeartRateVariabilityTimeDomainMetrics';
 
 const PlusWaveReport = () => {
   const [dataCollectionPeriods, setDataCollectionPeriods] = useState([]);
@@ -18,6 +19,7 @@ const PlusWaveReport = () => {
     rrIntervalsAvarage: [],
     rrIntervalsIntervals: [],
   });
+  const [heartRateVariabilityTimeDomainMetrics, setHeartRateVariabilityTimeDomainMetrics] = useState<any>({})
 
   useEffect(() => {
     getAllDataCollectionPeriods()
@@ -42,6 +44,10 @@ const PlusWaveReport = () => {
       .catch((error: Error) => {
         message.error('生成报告失败: ' + error.message);
       });
+
+    getTimeDomainMetrics(periodId).then((timeDomainMetrics) => {
+      setHeartRateVariabilityTimeDomainMetrics(timeDomainMetrics)
+    })
 
     setPeriodIdToGenReport(periodId);
   }, [periodId]);
@@ -89,6 +95,11 @@ const PlusWaveReport = () => {
             <RRIntervals title={'心跳间期（差值）'} data={rrIntervals.rrIntervalsIntervals} max={500} min={-500} />
           </div>
         </div>
+
+        <div>
+          <HeartRateVariabilityTimeDomainMetrics heartRateVariabilityTimeDomainMetrics={heartRateVariabilityTimeDomainMetrics}/>
+        </div>
+
         <div className="report-box">
           <PlusWaveMetrics periodId={periodId} />
         </div>
