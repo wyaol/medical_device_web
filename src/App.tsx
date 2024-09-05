@@ -47,8 +47,8 @@ const App: React.FC = () => {
 
     return (
         <Router>
-            <Layout style={{height: '100vh'}}>
-            <Sider trigger={null} collapsible collapsed={collapsed}>
+            <Layout>
+            <Sider  style={{height: '100vh'}} trigger={null} collapsible collapsed={collapsed}>
                 <div className="logo-vertical">
                     <h1>辅助智能系统</h1>
                 </div>

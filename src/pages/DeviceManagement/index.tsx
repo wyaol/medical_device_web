@@ -1,14 +1,42 @@
-import React, { useState } from 'react';
-import { Button, Card, Col, Row, Space, Spin, Tag, Alert } from 'antd';
+import React, { useEffect, useState } from 'react';
+import { Button, Card, Col, Row, Space, Spin, Tag, Alert, message } from 'antd';
 import storage from '../../storage';
 import request from '../../config/request';
 import { AxiosResponse } from 'axios';
+import { useGlobalState } from '../../config/GlobalStateContext';
+import { connectPlusWaveDevice, startDataCollector, stopDataCollector } from '../../service/plusWaveService';
 
 const DeviceManagement: React.FC = () => {
   const [connected, setConnected] = useState(false);
   const [bluetooth, setBluetooth] = useState<Record<string, string>[]>([]);
   const [loading, setLoading] = useState(false);
+  const [connectLoading, setConnectLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const { globalState, setGlobalState } = useGlobalState();
+
+  useEffect(() => {
+    setBluetooth(globalState.plusWave.bluetooth);
+    setConnected(globalState.plusWave.connect.success);
+  }, [globalState.plusWave.bluetooth, globalState.plusWave.connect.success])
+
+  useEffect(() => {
+    setBluetooth(globalState.plusWave.bluetooth);
+    setLoading(false);
+  }, [
+    globalState.plusWave.bluetooth
+  ])
+
+  useEffect(() => {
+    if (storage.plusWave.connect.message !== '') {
+      alert(globalState.plusWave.connect.message)
+    } else {
+      setConnected(globalState.plusWave.connect.success);
+    }
+    setConnectLoading(false);
+  }, [
+    globalState.plusWave.connect
+  ])
 
   const scanBluetooth = () => {
     setLoading(true);
@@ -18,10 +46,6 @@ const DeviceManagement: React.FC = () => {
         if (res.status !== 200) {
           throw new Error('Scan failed');
         }
-        setTimeout(() => {
-          setBluetooth(storage.plusWave.bluetooth);
-          setLoading(false);
-        }, 10000);
       })
       .catch((err) => {
         setLoading(false);
@@ -30,37 +54,42 @@ const DeviceManagement: React.FC = () => {
   };
 
   const connect = (address: string) => {
-    setLoading(true);
-    request.post(`/plus_wave/devices/${storage.deviceId}/connect`, { uuid: address })
-      .then((res: AxiosResponse<any>) => {
-        if (res.status !== 200) {
-          throw new Error('Connection failed');
-        }
-        setTimeout(() => {
-          if (storage.plusWave.connect.message !== '') {
-            alert(storage.plusWave.connect.message)
-          } else {
-            setConnected(storage.plusWave.connect.success);
-          }
-          setLoading(false);
-        }, 5000);
-        setLoading(false);
-      })
-      .catch((err) => {
-        setLoading(false);
+    setConnectLoading(true);
+    connectPlusWaveDevice(storage.deviceId, address).catch((err: any) => {
+        setConnectLoading(false);
         setError(err.message);
       });
   };
 
   const start = () => {
-    request.post(`/plus_wave/devices/${storage.deviceId}/start`).then(() => {
-      console.log('start');
+    const nowTime = new Date();
+    startDataCollector(storage.deviceId).then(() => {
+      setGlobalState({
+        ...globalState,
+        dataCollectionPeriod: {
+          ...globalState.dataCollectionPeriod,
+          startTime: nowTime
+        }
+      })
+      message.success('开始采集');
+    }).catch((error: Error) => {
+      message.error(error.message);
     })
   }
 
   const stop = () => {
-    request.post(`/plus_wave/devices/${storage.deviceId}/stop`).then(() => {
-      console.log('stop');
+    const nowTime = new Date();
+    stopDataCollector(storage.deviceId, globalState.dataCollectionPeriod.startTime, nowTime).then(() => {
+      setGlobalState({
+        ...globalState,
+        dataCollectionPeriod: {
+          ...globalState.dataCollectionPeriod,
+          endTime: nowTime
+        }
+      })
+      message.success('停止采集');
+    }).catch((error: Error) => {
+      message.error(error.message);
     })
   }
 
@@ -88,7 +117,7 @@ const DeviceManagement: React.FC = () => {
                         <strong>{item.name}</strong>
                       </Col>
                       <Col>
-                        <Button type="primary" onClick={() => connect(item.address)} loading={loading}>
+                        <Button type="primary" onClick={() => connect(item.address)} loading={connectLoading}>
                           连接
                         </Button>
                       </Col>

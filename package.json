@@ -2,11 +2,10 @@
   "name": "medical_device_web",
   "version": "0.1.0",
   "private": true,
+  "main": "main.js",
+  "homepage": ".",
   "dependencies": {
     "@ant-design/icons": "^5.4.0",
-    "@emotion/react": "^11.13.0",
-    "@emotion/styled": "^11.13.0",
-    "@mui/material": "^5.16.6",
     "@testing-library/jest-dom": "^5.17.0",
     "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^13.5.0",
@@ -17,9 +16,9 @@
     "@types/react-router-dom": "^5.3.3",
     "antd": "^5.19.3",
     "axios": "^1.7.2",
-    "echarts": "^5.5.0",
     "echarts-for-react": "^3.0.2",
     "http-proxy-middleware": "^3.0.0",
+    "jwt-decode": "^4.0.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-router-dom": "^6.25.1",
@@ -32,7 +31,9 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "electron-start": "electron .",
+    "package": "electron-packager ./build medical_device --all --out ./packages"
   },
   "eslintConfig": {
     "extends": [
@@ -51,5 +52,9 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "electron": "^31.3.1",
+    "electron-packager": "^17.1.2"
   }
 }

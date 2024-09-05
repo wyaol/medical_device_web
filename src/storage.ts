@@ -1,12 +1,17 @@
 export interface Storage {
-    deviceId: string
-    plusWave: {
-        connect: {
-            success: boolean
-            message: string
-        },
-        bluetooth: Record<string, string>[]
+  dataCollectionPeriod: {
+    startTime: Date | null,
+    endTime: Date | null,
+  }
+  deviceId: string
+  plusWave: {
+    connect: {
+      success: boolean
+      message: string
     },
+    bluetooth: Record<string, string>[],
+    data: Record<string, number[]>
+  },
     co2SerialData: {
         co2WaveformData: {
             co2Waveform: number[],
@@ -28,15 +33,28 @@ export interface Storage {
     }
 }
 
+const len = 20
+
 const storage: Storage = {
-    deviceId: '',
-    plusWave: {
-        connect: {
-            success: false,
-            message: ''
-        },
-        bluetooth: []
+  dataCollectionPeriod: {
+    startTime: null,
+    endTime: null,
+  },
+  deviceId: "190070690681122",
+  plusWave: {
+    connect: {
+      success: false,
+      message: ''
     },
+    bluetooth: [],
+    data: {
+      'blood_pressure_diastolic': Array(len).fill(0),
+      'blood_pressure_systolic': new Array(len).fill(0),
+      'heart_rate': new Array(len).fill(0),
+      'microcirculation': new Array(len).fill(0),
+      'oxygen_saturation': new Array(len).fill(0),
+    }
+  },
     co2SerialData: {
         co2WaveformData: {
             co2Waveform: new Array(60),
