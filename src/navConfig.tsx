@@ -1,12 +1,12 @@
 // src/navConfig.ts
-import {LineChartOutlined, BarChartOutlined, SettingOutlined} from '@ant-design/icons';
+import { LineChartOutlined, BarChartOutlined, SettingOutlined, UserOutlined } from '@ant-design/icons';
 import PlusWaveRealTimeData from "./pages/PlusWaveRealTimeData";
 import HeartRateRealTimeData from "./pages/HeartRateRealTimeData";
 import DeviceManagement from "./pages/DeviceManagement";
 import PlusWaveReport from './pages/PlusWaveReport';
 import PatientCreate from './pages/PatientCreate';
 import PatientSelect from './pages/PatientSelect';
-import CO2WaveformRealData from './pages/Co2WaveformRealTimeData';
+import CO2WaveformRealData from './pages/Co2WaveformRealData';
 
 export interface NavItem {
   key: string;

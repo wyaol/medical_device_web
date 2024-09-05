@@ -1,13 +1,8 @@
 import axios from 'axios';
 
 // 创建 Axios 实例并设置默认配置
-// const axiosInstance = axios.create({
-//   baseURL: '/api', // 设置基础 URL
-//   timeout: 10000, // 设置请求超时时间
-// });
-
 const axiosInstance = axios.create({
-  baseURL: 'http://localhost:5000/', // 设置基础 URL
+  baseURL: '/api', // 设置基础 URL
   timeout: 10000, // 设置请求超时时间
 });
 
