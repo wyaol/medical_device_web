@@ -6,6 +6,7 @@ import PlusWaveMetrics from '../../components/PlusWaveMetrics';
 import RRIntervals from '../../components/RRIntervals';
 import HeartRateVariabilityTimeDomainMetrics from '../../components/HeartRateVariabilityTimeDomainMetrics';
 import IntervalsDensity from '../../components/IntervalsDensity';
+import InterBeatInterval from '../../components/InterBeatInterval';
 
 const PlusWaveReport = () => {
   const [dataCollectionPeriods, setDataCollectionPeriods] = useState([]);
@@ -102,7 +103,12 @@ const PlusWaveReport = () => {
         </div>
 
         <div className="report-box">
-          <IntervalsDensity data={intervalsDensityData}/>
+          <div>
+            <IntervalsDensity data={intervalsDensityData}/>
+          </div>
+          <div>
+            <InterBeatInterval data={rrIntervals.rrIntervals} />
+          </div>
         </div>
 
         <div>

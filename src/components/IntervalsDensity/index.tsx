@@ -21,7 +21,7 @@ const renderOption = (binCenters: [], probabilities: []) => ({
     nameLocation: 'middle',
     nameTextStyle: {
       fontWeight: 'bold',
-      fontSize: 16,
+      fontSize: 8,
       padding: 10
     }
   },
@@ -31,16 +31,15 @@ const renderOption = (binCenters: [], probabilities: []) => ({
     name: '概率密度',
     nameLocation: 'middle',
     nameTextStyle: {
-      fontWeight: 'bold',
-      fontSize: 16,
-      padding: 40
+      fontSize: 10,
+      padding: 25
     }
   },
   series: [{
     data: probabilities.map((item: number) => item.toFixed(3)),
     type: 'bar',
     name: '概率密度',
-    barWidth: '60%',
+    // barWidth: '60%',
     itemStyle: {
       color: '#74B9FF'
     }
@@ -66,7 +65,7 @@ const IntervalsDensity: React.FC<{
           notMerge={true}
           ref={ref}
           option={renderOption([], [])}
-          style={{height: '500px', width: '100%'}}
+          style={{height: '300px', width: '40%'}}
       />
   );
 }
