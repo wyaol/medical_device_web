@@ -62,14 +62,14 @@ const renderOption = (data: any) => ({
       }
     }
   },
-  toolbox: {
-    show: true,
-    feature: {
-      dataView: { readOnly: false },
-      restore: {},
-      saveAsImage: {}
-    }
-  }
+  // toolbox: {
+  //   show: true,
+  //   feature: {
+  //     dataView: { readOnly: false },
+  //     restore: {},
+  //     saveAsImage: {}
+  //   }
+  // }
 })
 
 // eslint-disable-next-line 

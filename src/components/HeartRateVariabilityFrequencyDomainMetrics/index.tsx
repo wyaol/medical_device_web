@@ -125,7 +125,7 @@ const HeartRateVariabilityFrequencyDomainMetrics: (props: {
 
     return (
       <>
-        <h1>心跳间期统计学参数-时间域特征表</h1>
+        <h1>心跳间期统计学参数-时域特征表</h1>
         <Table columns={columns} dataSource={renderData(tp, vlf, lf, mf, hf, vhf, topF, topH, tp_, vlf_, lf_, mf_, hf_, vhf_, l_h)} pagination={false}/>
       </>
     )
