@@ -59,6 +59,7 @@ export const getRRIntervals = async (periodId: number|null) => {
     rrIntervals: response['rr_intervals'],
     rrIntervalsAvarage: response['rr_intervals_average'],
     rrIntervalsIntervals: response['rr_intervals_intervals'],
+    intervalsDensityData: response['intervals_density'],
   };
 }
 

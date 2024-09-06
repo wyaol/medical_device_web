@@ -5,19 +5,23 @@ import './index.css';
 import PlusWaveMetrics from '../../components/PlusWaveMetrics';
 import RRIntervals from '../../components/RRIntervals';
 import HeartRateVariabilityTimeDomainMetrics from '../../components/HeartRateVariabilityTimeDomainMetrics';
+import IntervalsDensity from '../../components/IntervalsDensity';
 
 const PlusWaveReport = () => {
   const [dataCollectionPeriods, setDataCollectionPeriods] = useState([]);
   const [periodId, setPeriodId] = useState<number | null>(null);
   const [periodIdToGenReport, setPeriodIdToGenReport] = useState<number | null>(null);
+  const [intervalsDensityData, setIntervalsDensityData] = useState<[]>([])
   const [rrIntervals, setRrIntervals] = useState<{
     rrIntervals: number[],
     rrIntervalsAvarage: number[],
     rrIntervalsIntervals: number[],
+    intervalsDensityData: any
   }>({
     rrIntervals: [],
     rrIntervalsAvarage: [],
     rrIntervalsIntervals: [],
+    intervalsDensityData: {}
   });
   const [heartRateVariabilityTimeDomainMetrics, setHeartRateVariabilityTimeDomainMetrics] = useState<any>({})
 
@@ -40,6 +44,7 @@ const PlusWaveReport = () => {
     getRRIntervals(periodId)
       .then(rrIntervals => {
         setRrIntervals(rrIntervals);
+        setIntervalsDensityData(rrIntervals.intervalsDensityData);
       })
       .catch((error: Error) => {
         message.error('生成报告失败: ' + error.message);
@@ -94,6 +99,10 @@ const PlusWaveReport = () => {
           <div>
             <RRIntervals title={'心跳间期（差值）'} data={rrIntervals.rrIntervalsIntervals} max={500} min={-500} />
           </div>
+        </div>
+
+        <div className="report-box">
+          <IntervalsDensity data={intervalsDensityData}/>
         </div>
 
         <div>
