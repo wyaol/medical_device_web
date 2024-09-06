@@ -34,7 +34,6 @@ const PSDHistogram: React.FC<{ data: number[] }> = ({ data }) => {
   return (
     <ReactEcharts
       option={renderOption(data)}
-      style={{ height: '500px', width: '100%' }}
     />
   );
 };

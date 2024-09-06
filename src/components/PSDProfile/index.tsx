@@ -86,7 +86,6 @@ const PSDProfile: React.FC<{
     <ReactEcharts
       notMerge={true}
       option={renderOption(dataArray)}
-      style={{ height: '500px', width: '100%' }}
     />
   );
 }

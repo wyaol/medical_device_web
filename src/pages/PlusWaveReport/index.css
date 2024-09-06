@@ -1,66 +1,83 @@
 .plus-wave-report-container {
-    padding: 20px;
-  }
-  
-  .select-container {
-    margin-bottom: 16px;
-    display: flex;
-    align-items: center;
-  }
-  
-  .select-dropdown {
-    width: 200px;
-    margin-left: 8px;
-  }
-  
-  .generate-report-button {
-    margin-top: 16px;
-  }
-  
-  .report-box {
-    margin-top: 20px;
-    padding: 20px;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    background-color: #f9f9f9;
-  }
-  
-  .report-title {
-    font-weight: bold;
-    margin-bottom: 10px;
-    font-size: 16px;
-  }
-  
-  .report-results {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-  }
-  
-  .interval-item {
-    /* padding: 10px; */
-    /* background-color: #fff; */
-    /* border: 1px solid #ccc; */
-    /* border-radius: 4px; */
-    /* box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1); */
-    /* width: 60px; */
-    text-align: center;
-  }
-  
-  .no-data {
-    color: #888;
-    padding: 10px;
-  }
+  padding: 20px;
+}
 
-  .intervals-container {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
+.select-container {
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+}
 
-    height: 320px;
-  }
+.select-dropdown {
+  width: 200px;
+  margin-left: 8px;
+}
 
-  .intervals-container > div {
-    width: 30%;
-  }
-  
+.generate-report-button {
+  margin-top: 16px;
+}
+
+.report-box {
+  margin-top: 20px;
+  padding: 20px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background-color: #f9f9f9;
+}
+
+.report-title {
+  font-weight: bold;
+  margin-bottom: 10px;
+  font-size: 16px;
+}
+
+.report-results {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.interval-item {
+  /* padding: 10px; */
+  /* background-color: #fff; */
+  /* border: 1px solid #ccc; */
+  /* border-radius: 4px; */
+  /* box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1); */
+  /* width: 60px; */
+  text-align: center;
+}
+
+.no-data {
+  color: #888;
+  padding: 10px;
+}
+
+.intervals-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  height: 320px;
+}
+
+.intervals-container>div {
+  width: 30%;
+}
+
+.intervals-container-2 {
+  display: flex;
+  align-items: center;
+  gap: 30px; /* 固定的间隔距离 */
+}
+
+.psd-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  height: 400px;
+}
+
+.psd-container > div {
+  width: 48%;
+}

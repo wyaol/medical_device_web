@@ -59,7 +59,7 @@ const IntervalsDensity: React.FC<{
       <ReactEcharts
           notMerge={true}
           option={renderOption(props.binCenters, props.counts)}
-          style={{height: '300px', width: '40%'}}
+          style={{height: '300px', width: '500px'}}
       />
   );
 }

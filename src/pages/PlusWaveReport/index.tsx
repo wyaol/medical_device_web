@@ -70,8 +70,8 @@ const PlusWaveReport = () => {
 
     getPSD(periodId)
       .then(({ normalizedPsd, frequencies, histogram }) => {
-        setNormalizedPsd(normalizedPsd);
-        setFrequencies(frequencies);
+        setNormalizedPsd(normalizedPsd.map((item: number) => item.toFixed(3)));
+        setFrequencies(frequencies.map((item: number) => item.toFixed(3)));
         const { VL, L, M, H, VH } = histogram
         setPsdHistogramData([VL, L, M, H, VH]);
       })
@@ -127,7 +127,7 @@ const PlusWaveReport = () => {
           </div>
         </div>
 
-        <div className="report-box">
+        <div className="report-box intervals-container-2">
           <div>
             <IntervalsDensity binCenters={intervalsDensityData.binCenters} counts={intervalsDensityData.counts} />
           </div>
@@ -136,12 +136,16 @@ const PlusWaveReport = () => {
           </div>
         </div>
 
-        <div className="report-box">
-          <PSDProfile frequencies={frequencies} normalizedPsd={normalizedPsd} />
-          <PSDHistogram data={psdHistogramData} />
+        <div className="report-box psd-container">
+          <div>
+            <PSDProfile frequencies={frequencies} normalizedPsd={normalizedPsd} />
+          </div>
+          <div>
+            <PSDHistogram data={psdHistogramData} />
+          </div>
         </div>
 
-        <div>
+        <div style={{marginTop: '30px'}}>
           <HeartRateVariabilityTimeDomainMetrics heartRateVariabilityTimeDomainMetrics={heartRateVariabilityTimeDomainMetrics} />
           <HeartRateVariabilityFrequencyDomainMetrics heartRateVariabilityFrequencyDomainMetrics={heartRateVariabilityFrequencyDomainMetrics} />
         </div>
