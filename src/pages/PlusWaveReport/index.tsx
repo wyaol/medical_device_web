@@ -1,6 +1,6 @@
 import { Button, message, Select } from 'antd';
 import React, { useEffect, useState, useCallback } from 'react';
-import { getAllDataCollectionPeriods, getPSD, getRRIntervals, getTimeDomainMetrics } from '../../service/plusWaveService';
+import { getAllDataCollectionPeriods, getFrequencyDomainMetrics, getPSD, getRRIntervals, getTimeDomainMetrics } from '../../service/plusWaveService';
 import './index.css';
 import PlusWaveMetrics from '../../components/PlusWaveMetrics';
 import RRIntervals from '../../components/RRIntervals';
@@ -8,14 +8,17 @@ import HeartRateVariabilityTimeDomainMetrics from '../../components/HeartRateVar
 import IntervalsDensity from '../../components/IntervalsDensity';
 import InterBeatInterval from '../../components/InterBeatInterval';
 import PSDProfile from '../../components/PSDProfile';
+import PSDHistogram from '../../components/PSDHistogram';
+import HeartRateVariabilityFrequencyDomainMetrics from '../../components/HeartRateVariabilityFrequencyDomainMetrics';
 
 const PlusWaveReport = () => {
   const [dataCollectionPeriods, setDataCollectionPeriods] = useState([]);
   const [periodId, setPeriodId] = useState<number | null>(null);
   const [periodIdToGenReport, setPeriodIdToGenReport] = useState<number | null>(null);
+  const [psdHistogramData, setPsdHistogramData] = useState<number[]>([]);
   const [intervalsDensityData, setIntervalsDensityData] = useState<{
-    binCenters: [],
-    counts: []
+    binCenters: number[],
+    counts: number[]
   }>({
     binCenters: [],
     counts: []
@@ -34,6 +37,7 @@ const PlusWaveReport = () => {
     intervalsDensityData: {}
   });
   const [heartRateVariabilityTimeDomainMetrics, setHeartRateVariabilityTimeDomainMetrics] = useState<any>({})
+  const [heartRateVariabilityFrequencyDomainMetrics, setHeartRateVariabilityFrequencyDomainMetrics] = useState<any>({})
 
   useEffect(() => {
     getAllDataCollectionPeriods()
@@ -65,9 +69,15 @@ const PlusWaveReport = () => {
     })
 
     getPSD(periodId)
-    .then(({normalizedPsd, frequencies}) => {
-      setNormalizedPsd(normalizedPsd);
-      setFrequencies(frequencies);
+      .then(({ normalizedPsd, frequencies, histogram }) => {
+        setNormalizedPsd(normalizedPsd);
+        setFrequencies(frequencies);
+        const { VL, L, M, H, VH } = histogram
+        setPsdHistogramData([VL, L, M, H, VH]);
+      })
+
+    getFrequencyDomainMetrics(periodId).then((frequencyDomainMetrics) => {
+      setHeartRateVariabilityFrequencyDomainMetrics(frequencyDomainMetrics)
     })
 
     setPeriodIdToGenReport(periodId);
@@ -119,19 +129,21 @@ const PlusWaveReport = () => {
 
         <div className="report-box">
           <div>
-            <IntervalsDensity binCenters={intervalsDensityData.binCenters} counts={intervalsDensityData.counts}/>
+            <IntervalsDensity binCenters={intervalsDensityData.binCenters} counts={intervalsDensityData.counts} />
           </div>
           <div>
             <InterBeatInterval data={rrIntervals.rrIntervals} />
           </div>
         </div>
-        
-        <div>
-         <PSDProfile frequencies={frequencies} normalizedPsd={normalizedPsd} />
+
+        <div className="report-box">
+          <PSDProfile frequencies={frequencies} normalizedPsd={normalizedPsd} />
+          <PSDHistogram data={psdHistogramData} />
         </div>
 
         <div>
-          <HeartRateVariabilityTimeDomainMetrics heartRateVariabilityTimeDomainMetrics={heartRateVariabilityTimeDomainMetrics}/>
+          <HeartRateVariabilityTimeDomainMetrics heartRateVariabilityTimeDomainMetrics={heartRateVariabilityTimeDomainMetrics} />
+          <HeartRateVariabilityFrequencyDomainMetrics heartRateVariabilityFrequencyDomainMetrics={heartRateVariabilityFrequencyDomainMetrics} />
         </div>
 
         <div className="report-box">
