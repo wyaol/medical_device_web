@@ -59,7 +59,10 @@ export const getRRIntervals = async (periodId: number|null) => {
     rrIntervals: response['rr_intervals'],
     rrIntervalsAvarage: response['rr_intervals_average'],
     rrIntervalsIntervals: response['rr_intervals_intervals'],
-    intervalsDensityData: response['intervals_density'],
+    intervalsDensityData: {
+      binCenters: response['intervals_density']['bin_centers'],
+      counts: response['intervals_density']['counts'],
+    },
   };
 }
 
@@ -81,4 +84,13 @@ export const getTimeDomainMetrics = async (periodId: number|null) => {
   if (!periodId) throw new Error('请选择时间区间');
   const response = await request.post(`/plus_wave/data_collection_periods/${periodId}/time_domain`).then(res => res.data.data);
   return response;
+}
+
+export const getPSD = async (periodId: number|null) => {
+  if (!periodId) throw new Error('请选择时间区间');
+  const response = await request.get(`/plus_wave/data_collection_periods/${periodId}/psd`).then(res => res.data.data);
+  return {
+    normalizedPsd: response['normalized_psd'],
+    frequencies: response['frequencies'],
+  };
 }

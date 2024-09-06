@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import React from "react";
 import ReactEcharts from "echarts-for-react";
 
 const renderOption = (data: number[]) => {
@@ -60,12 +60,9 @@ const InterBeatInterval: React.FC<{
   data: number[],
 }) => {
 
-  const ref = useRef(null);
-
   return <div>
     <ReactEcharts
       notMerge={true}
-      ref={ref}
       option={renderOption(props.data)}
       style={{ height: '300px', width: '300px' }}
     />

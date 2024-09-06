@@ -1,7 +1,7 @@
-import React, {useEffect, useRef} from "react";
 import ReactEcharts from "echarts-for-react";
+import React from "react";
 
-const renderOption = (binCenters: [], probabilities: []) => ({
+const renderOption = (binCenters: number[], probabilities: number[]) => ({
   title: {
     text: '心跳间期概率分布图',
     left: 'center'
@@ -48,23 +48,17 @@ const renderOption = (binCenters: [], probabilities: []) => ({
 
 
 const IntervalsDensity: React.FC<{
-  data: [],
+  binCenters: number[],
+  counts: number[]
 }> = (props: {
-  data: [],
+  binCenters: number[],
+  counts: number[]
 }) => {
-
-  const ref = useRef(null);
-
-  useEffect(() => {
-    // @ts-ignore
-    ref?.current?.getEchartsInstance().setOption(renderOption(props.data['bin_centers'], props.data['counts']));
-  }, [props.data]);
 
   return (
       <ReactEcharts
           notMerge={true}
-          ref={ref}
-          option={renderOption([], [])}
+          option={renderOption(props.binCenters, props.counts)}
           style={{height: '300px', width: '40%'}}
       />
   );

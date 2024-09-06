@@ -1,18 +1,27 @@
 import { Button, message, Select } from 'antd';
 import React, { useEffect, useState, useCallback } from 'react';
-import { getAllDataCollectionPeriods, getRRIntervals, getTimeDomainMetrics } from '../../service/plusWaveService';
+import { getAllDataCollectionPeriods, getPSD, getRRIntervals, getTimeDomainMetrics } from '../../service/plusWaveService';
 import './index.css';
 import PlusWaveMetrics from '../../components/PlusWaveMetrics';
 import RRIntervals from '../../components/RRIntervals';
 import HeartRateVariabilityTimeDomainMetrics from '../../components/HeartRateVariabilityTimeDomainMetrics';
 import IntervalsDensity from '../../components/IntervalsDensity';
 import InterBeatInterval from '../../components/InterBeatInterval';
+import PSDProfile from '../../components/PSDProfile';
 
 const PlusWaveReport = () => {
   const [dataCollectionPeriods, setDataCollectionPeriods] = useState([]);
   const [periodId, setPeriodId] = useState<number | null>(null);
   const [periodIdToGenReport, setPeriodIdToGenReport] = useState<number | null>(null);
-  const [intervalsDensityData, setIntervalsDensityData] = useState<[]>([])
+  const [intervalsDensityData, setIntervalsDensityData] = useState<{
+    binCenters: [],
+    counts: []
+  }>({
+    binCenters: [],
+    counts: []
+  })
+  const [frequencies, setFrequencies] = useState<[]>([])
+  const [normalizedPsd, setNormalizedPsd] = useState<[]>([])
   const [rrIntervals, setRrIntervals] = useState<{
     rrIntervals: number[],
     rrIntervalsAvarage: number[],
@@ -53,6 +62,12 @@ const PlusWaveReport = () => {
 
     getTimeDomainMetrics(periodId).then((timeDomainMetrics) => {
       setHeartRateVariabilityTimeDomainMetrics(timeDomainMetrics)
+    })
+
+    getPSD(periodId)
+    .then(({normalizedPsd, frequencies}) => {
+      setNormalizedPsd(normalizedPsd);
+      setFrequencies(frequencies);
     })
 
     setPeriodIdToGenReport(periodId);
@@ -104,11 +119,15 @@ const PlusWaveReport = () => {
 
         <div className="report-box">
           <div>
-            <IntervalsDensity data={intervalsDensityData}/>
+            <IntervalsDensity binCenters={intervalsDensityData.binCenters} counts={intervalsDensityData.counts}/>
           </div>
           <div>
             <InterBeatInterval data={rrIntervals.rrIntervals} />
           </div>
+        </div>
+        
+        <div>
+         <PSDProfile frequencies={frequencies} normalizedPsd={normalizedPsd} />
         </div>
 
         <div>
