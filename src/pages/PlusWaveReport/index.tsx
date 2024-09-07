@@ -1,25 +1,43 @@
 import { Button, message, Select } from 'antd';
 import React, { useEffect, useState, useCallback } from 'react';
-import { getAllDataCollectionPeriods, getRRIntervals, getTimeDomainMetrics } from '../../service/plusWaveService';
+import { getAllDataCollectionPeriods, getFrequencyDomainMetrics, getPSD, getRRIntervals, getTimeDomainMetrics } from '../../service/plusWaveService';
 import './index.css';
 import PlusWaveMetrics from '../../components/PlusWaveMetrics';
 import RRIntervals from '../../components/RRIntervals';
 import HeartRateVariabilityTimeDomainMetrics from '../../components/HeartRateVariabilityTimeDomainMetrics';
+import IntervalsDensity from '../../components/IntervalsDensity';
+import InterBeatInterval from '../../components/InterBeatInterval';
+import PSDProfile from '../../components/PSDProfile';
+import PSDHistogram from '../../components/PSDHistogram';
+import HeartRateVariabilityFrequencyDomainMetrics from '../../components/HeartRateVariabilityFrequencyDomainMetrics';
 
 const PlusWaveReport = () => {
   const [dataCollectionPeriods, setDataCollectionPeriods] = useState([]);
   const [periodId, setPeriodId] = useState<number | null>(null);
   const [periodIdToGenReport, setPeriodIdToGenReport] = useState<number | null>(null);
+  const [psdHistogramData, setPsdHistogramData] = useState<number[]>([]);
+  const [intervalsDensityData, setIntervalsDensityData] = useState<{
+    binCenters: number[],
+    counts: number[]
+  }>({
+    binCenters: [],
+    counts: []
+  })
+  const [frequencies, setFrequencies] = useState<[]>([])
+  const [normalizedPsd, setNormalizedPsd] = useState<[]>([])
   const [rrIntervals, setRrIntervals] = useState<{
     rrIntervals: number[],
     rrIntervalsAvarage: number[],
     rrIntervalsIntervals: number[],
+    intervalsDensityData: any
   }>({
     rrIntervals: [],
     rrIntervalsAvarage: [],
     rrIntervalsIntervals: [],
+    intervalsDensityData: {}
   });
   const [heartRateVariabilityTimeDomainMetrics, setHeartRateVariabilityTimeDomainMetrics] = useState<any>({})
+  const [heartRateVariabilityFrequencyDomainMetrics, setHeartRateVariabilityFrequencyDomainMetrics] = useState<any>({})
 
   useEffect(() => {
     getAllDataCollectionPeriods()
@@ -40,6 +58,7 @@ const PlusWaveReport = () => {
     getRRIntervals(periodId)
       .then(rrIntervals => {
         setRrIntervals(rrIntervals);
+        setIntervalsDensityData(rrIntervals.intervalsDensityData);
       })
       .catch((error: Error) => {
         message.error('生成报告失败: ' + error.message);
@@ -47,6 +66,18 @@ const PlusWaveReport = () => {
 
     getTimeDomainMetrics(periodId).then((timeDomainMetrics) => {
       setHeartRateVariabilityTimeDomainMetrics(timeDomainMetrics)
+    })
+
+    getPSD(periodId)
+      .then(({ normalizedPsd, frequencies, histogram }) => {
+        setNormalizedPsd(normalizedPsd.map((item: number) => item.toFixed(3)));
+        setFrequencies(frequencies.map((item: number) => item.toFixed(3)));
+        const { VL, L, M, H, VH } = histogram
+        setPsdHistogramData([VL, L, M, H, VH]);
+      })
+
+    getFrequencyDomainMetrics(periodId).then((frequencyDomainMetrics) => {
+      setHeartRateVariabilityFrequencyDomainMetrics(frequencyDomainMetrics)
     })
 
     setPeriodIdToGenReport(periodId);
@@ -96,8 +127,27 @@ const PlusWaveReport = () => {
           </div>
         </div>
 
-        <div>
-          <HeartRateVariabilityTimeDomainMetrics heartRateVariabilityTimeDomainMetrics={heartRateVariabilityTimeDomainMetrics}/>
+        <div className="report-box intervals-container-2">
+          <div>
+            <IntervalsDensity binCenters={intervalsDensityData.binCenters} counts={intervalsDensityData.counts} />
+          </div>
+          <div>
+            <InterBeatInterval data={rrIntervals.rrIntervals} />
+          </div>
+        </div>
+
+        <div className="report-box psd-container">
+          <div>
+            <PSDProfile frequencies={frequencies} normalizedPsd={normalizedPsd} />
+          </div>
+          <div>
+            <PSDHistogram data={psdHistogramData} />
+          </div>
+        </div>
+
+        <div style={{marginTop: '30px'}}>
+          <HeartRateVariabilityTimeDomainMetrics heartRateVariabilityTimeDomainMetrics={heartRateVariabilityTimeDomainMetrics} />
+          <HeartRateVariabilityFrequencyDomainMetrics heartRateVariabilityFrequencyDomainMetrics={heartRateVariabilityFrequencyDomainMetrics} />
         </div>
 
         <div className="report-box">

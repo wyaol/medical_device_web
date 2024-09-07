@@ -52,23 +52,27 @@ export const getAllDataCollectionPeriods = async () => {
 
 }
 
-export const getRRIntervals = async (periodId: number|null) => {
+export const getRRIntervals = async (periodId: number | null) => {
   if (!periodId) throw new Error('请选择时间区间');
   const response = await request.get(`/plus_wave/data_collection_periods/${periodId}/rr_intervals`).then(res => res.data.data);
   return {
     rrIntervals: response['rr_intervals'],
     rrIntervalsAvarage: response['rr_intervals_average'],
     rrIntervalsIntervals: response['rr_intervals_intervals'],
+    intervalsDensityData: {
+      binCenters: response['intervals_density']['bin_centers'],
+      counts: response['intervals_density']['counts'],
+    },
   };
 }
 
-export const getMetrics = async (periodId: number|null) => {
+export const getMetrics = async (periodId: number | null) => {
   if (!periodId) throw new Error('请选择时间区间');
   const response = await request.get(`/plus_wave/data_collection_periods/${periodId}/metrics`).then(res => res.data.data);
   return response;
 }
 
-export const getTrend = async (periodId: number|null, timeInterval: number) => {
+export const getTrend = async (periodId: number | null, timeInterval: number) => {
   if (!periodId) throw new Error('请选择时间区间');
   const response = await request.post(`/plus_wave/data_collection_periods/${periodId}/trend`, {
     'time_interval': timeInterval
@@ -76,8 +80,31 @@ export const getTrend = async (periodId: number|null, timeInterval: number) => {
   return response;
 }
 
-export const getTimeDomainMetrics = async (periodId: number|null) => {
+export const getTimeDomainMetrics = async (periodId: number | null) => {
   if (!periodId) throw new Error('请选择时间区间');
   const response = await request.post(`/plus_wave/data_collection_periods/${periodId}/time_domain`).then(res => res.data.data);
   return response;
+}
+
+export const getPSD = async (periodId: number | null) => {
+  if (!periodId) throw new Error('请选择时间区间');
+  const response = await request.get(`/plus_wave/data_collection_periods/${periodId}/psd`).then(res => res.data.data);
+  return {
+    normalizedPsd: response['profile']['normalized_psd'],
+    frequencies: response['profile']['frequencies'],
+    histogram: response['histogram'],
+  };
+}
+
+export const getFrequencyDomainMetrics = async (periodId: number | null) => {
+  if (!periodId) throw new Error('请选择时间区间');
+  const response = await request.post(`/plus_wave/data_collection_periods/${periodId}/frequency_domain`).then(res => res.data.data);
+  return {
+    totalPower: response['total_power'],
+    frequencyPowers: response['frequency_powers'],
+    peakFrequency: response['peak_frequency'],
+    peakAmplitude: response['peak_amplitude'],
+    fNormalizedPowers: response['f_normalized_powers'],
+    balanceIndex: response['balance_index'],
+  };
 }
