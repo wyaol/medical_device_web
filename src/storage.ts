@@ -1,34 +1,32 @@
 export interface Storage {
-  dataCollectionPeriod: {
-    startTime: Date | null,
-    endTime: Date | null,
-  }
-  deviceId: string
-  plusWave: {
-    connect: {
-      success: boolean
-      message: string
-    },
-    bluetooth: Record<string, string>[],
-    data: Record<string, number[]>
-  },
-    co2SerialData: {
-        co2WaveformData: {
-            co2Waveform: number[],
-            co2WaveformTime: number[],
-            data: {
-                co2_waveform: number,
-                interval: number,
-                dpi_info: { status: string, I_per_E: number }
-            }
+    dataCollectionPeriod: {
+        startTime: Date | null,
+        endTime: Date | null,
+    }
+    deviceId: string
+    plusWave: {
+        connect: {
+            success: boolean
+            message: string
         },
-        co2RealDpiInfo: {
+        bluetooth: Record<string, string>[],
+        data: Record<string, number[]>
+    },
+    co2WaveformData: {
+        curves: {
+            co2Waveform: number[],
+            co2WaveformTime: string[],
             etco2Waveform: number[],
-            etco2WaveformTime: number[],
-            lastETCO2: number,
-            data: {
-                ETCO2: number, RR: number, FiCO2: number
-            }
+            etco2WaveformTime: string[],
+        }
+        indicators: {
+            co2Waveform: number,
+            interval: number,
+            status: string,
+            I_per_E: number,
+            ETCO2: number,
+            RR: number,
+            FiCO2: number
         }
     }
 }
@@ -36,42 +34,40 @@ export interface Storage {
 const len = 20
 
 const storage: Storage = {
-  dataCollectionPeriod: {
-    startTime: null,
-    endTime: null,
-  },
-  deviceId: "190070690681122",
-  plusWave: {
-    connect: {
-      success: false,
-      message: ''
+    dataCollectionPeriod: {
+        startTime: null,
+        endTime: null,
     },
-    bluetooth: [],
-    data: {
-      'blood_pressure_diastolic': Array(len).fill(0),
-      'blood_pressure_systolic': new Array(len).fill(0),
-      'heart_rate': new Array(len).fill(0),
-      'microcirculation': new Array(len).fill(0),
-      'oxygen_saturation': new Array(len).fill(0),
-    }
-  },
-    co2SerialData: {
-        co2WaveformData: {
-            co2Waveform: new Array(60),
-            co2WaveformTime: new Array(60),
-            data: {
-                co2_waveform: 0,
-                interval: 0,
-                dpi_info: { status: '', I_per_E: 0 }
-            }
+    deviceId: "190070690681122",
+    plusWave: {
+        connect: {
+            success: false,
+            message: ''
         },
-        co2RealDpiInfo: {
-            etco2Waveform: new Array(60),
-            etco2WaveformTime: new Array(60),
-            lastETCO2: 0,
-            data: {
-                ETCO2: 0, RR: 0, FiCO2: 0
-            }
+        bluetooth: [],
+        data: {
+            'blood_pressure_diastolic': Array(len).fill(0),
+            'blood_pressure_systolic': new Array(len).fill(0),
+            'heart_rate': new Array(len).fill(0),
+            'microcirculation': new Array(len).fill(0),
+            'oxygen_saturation': new Array(len).fill(0),
+        }
+    },
+    co2WaveformData: {
+        curves: {
+            co2Waveform: [],
+            co2WaveformTime: [],
+            etco2Waveform: [],
+            etco2WaveformTime: []
+        },
+        indicators: {
+            co2Waveform: 0,
+            interval: 0,
+            status: '',
+            I_per_E: 0,
+            ETCO2: 0,
+            RR: 0,
+            FiCO2: 0
         }
     }
 }

@@ -6,7 +6,7 @@ import DeviceManagement from "./pages/DeviceManagement";
 import PlusWaveReport from './pages/PlusWaveReport';
 import PatientCreate from './pages/PatientCreate';
 import PatientSelect from './pages/PatientSelect';
-import CO2WaveformRealData from './pages/Co2WaveformRealData';
+import CO2WaveformRealData from './pages/CO2WaveformRealData';
 import CO2SerialReport from './pages/CO2SerialReport';
 
 export interface NavItem {
