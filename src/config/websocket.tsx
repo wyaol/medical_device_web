@@ -11,11 +11,23 @@ const WebSocketComponent = () => {
 
         socket.onopen = () => {
             console.log('WebSocket connection opened');
+            // 发送事件数据
+            const eventData = {
+                event: 'acquire_gateway_device_id'
+            };
+            socket.send(JSON.stringify(eventData));
         };
 
         socket.onmessage = (event) => {
             const data = JSON.parse(event.data);
             switch (data.event) {
+                case 'gateway_device_id':
+                    console.log(data);
+                    setGlobalState((prevState: Storage) => ({
+                        ...prevState,
+                        deviceId: data.data
+                    }));
+                    break;
                 case 'plus_wave_bluetooth_list':
                     setGlobalState((prevState: Storage) => ({
                         ...prevState,
