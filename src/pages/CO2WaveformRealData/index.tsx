@@ -1,8 +1,12 @@
 import React, {useEffect, useRef} from 'react';
 import {useGlobalState} from '../../config/GlobalStateContext';
+import {connectCO2SerialDevice, startDataCollector, stopDataCollector} from '../../service/co2SerialService';
 import ReactEcharts from "echarts-for-react";
-import {Button} from "antd";
+import {Button, message} from "antd";
 import axios from "axios";
+import storage from '../../storage';
+import request from '../../config/request';
+import {AxiosResponse} from 'axios';
 
 import CO2RealDataTable from '../../components/CO2RealDataTable';
 
@@ -58,20 +62,41 @@ const renderCO2WaveformOption = (data: {
     },
 })
 
-
-const co2_start = () => {
-    axios.create({baseURL: 'http://127.0.0.1:5000'}).get('api/co2/start').then(res => {
-    })
-}
-
-const co2_stop = () => {
-    axios.create({baseURL: 'http://127.0.0.1:5000'}).get('api/co2/stop').then(res => {
-    })
-}
-
 const CO2WaveformRealData = () => {
-    const {globalState} = useGlobalState();
+    const {globalState, setGlobalState} = useGlobalState();
     const chartRef = useRef(null);
+
+    const start = () => {
+        const nowTime = new Date();
+        startDataCollector(storage.deviceId).then(() => {
+            setGlobalState({
+                ...globalState,
+                dataCollectionPeriod: {
+                    ...globalState.dataCollectionPeriod,
+                    startTime: nowTime
+                }
+            })
+            message.success('开始采集');
+        }).catch((error: Error) => {
+            message.error(error.message);
+        })
+    }
+
+    const stop = () => {
+        const nowTime = new Date();
+        stopDataCollector(storage.deviceId, globalState.dataCollectionPeriod.startTime, nowTime).then(() => {
+            setGlobalState({
+                ...globalState,
+                dataCollectionPeriod: {
+                    ...globalState.dataCollectionPeriod,
+                    endTime: nowTime
+                }
+            })
+            message.success('停止采集');
+        }).catch((error: Error) => {
+            message.error(error.message);
+        })
+    }
 
     useEffect(() => {
         // @ts-ignore
@@ -81,8 +106,8 @@ const CO2WaveformRealData = () => {
     return (
         <div style={{display: "flex", flexDirection: "column"}}>
             <div style={{display: "flex", justifyContent: "flex-start", alignItems: "center"}}>
-                <Button onClick={() => co2_start()}>开始采集</Button>
-                <Button onClick={() => co2_stop()} style={{marginLeft: '10px'}}>停止采集</Button>
+                <Button onClick={() => start()}>开始采集</Button>
+                <Button onClick={() => stop()} style={{marginLeft: '10px'}}>停止采集</Button>
                 <Button type="primary" onClick={() => {
                 }} style={{marginLeft: '50px'}}>设备扫描</Button>
             </div>
