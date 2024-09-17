@@ -17,11 +17,14 @@ export const startDataCollector = async (deviceId: string) => {
     }
 }
 
-export const stopDataCollector = async (deviceId: string, startTime: Date | null, endTime: Date | null) => {
+export const stopDataCollector = async (deviceId: string, startTime: Date | null, endTime: Date | null, fileName: string) => {
+    let presignedUrl: string = '';
     await request.post(`/co2_serial_device/${deviceId}/stop_collect`, {
         'start_time': startTime,
-        'end_time': endTime
-    });
+        'end_time': endTime,
+        'file_name': fileName
+    }).then(res => presignedUrl = res.data.presigned_url);
+    return presignedUrl;
 }
 
 export const getAllDataCollectionPeriods = async () => {
@@ -34,4 +37,12 @@ export const getAllDataCollectionPeriods = async () => {
         }
         throw error;
     }
+}
+
+export const getCO2DataRecordPresignedUrl = async (filename:string) => {
+    let presignedUrl: string = '';
+    await request.post(`/co2_serial/co2_data_record`, {
+        'file_name': filename
+    }).then(res => presignedUrl = res.data.presigned_url);
+    return presignedUrl;
 }

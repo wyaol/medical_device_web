@@ -7,7 +7,7 @@ import PlusWaveReport from './pages/PlusWaveReport';
 import PatientCreate from './pages/PatientCreate';
 import PatientSelect from './pages/PatientSelect';
 import CO2WaveformRealData from './pages/CO2WaveformRealData';
-import CO2SerialReport from './pages/CO2SerialReport';
+import CO2DataReport from './pages/CO2DataReport';
 
 export interface NavItem {
     key: string;
@@ -61,7 +61,7 @@ const navConfig: NavItem[] = [
                 key: '2-2',
                 path: '/analyse-report/co2-serial',
                 name: 'CO2',
-                element: <CO2SerialReport/>,
+                element: <CO2DataReport/>,
             },
         ],
     },

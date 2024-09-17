@@ -41,6 +41,11 @@ export interface Storage {
             RR: number,
             FiCO2: number
         }
+        recordDuration: {
+            startTime: Date | null,
+            endTime: Date | null,
+            upload: boolean
+        }
     }
 }
 
@@ -68,9 +73,9 @@ const storage: Storage = {
     },
     co2WaveformData: {
         curves: {
-            co2Waveform: [],
+            co2Waveform: new Array(120).fill(0),
             co2WaveformTime: [],
-            etco2Waveform: [],
+            etco2Waveform: new Array(len).fill(0),
             etco2WaveformTime: []
         },
         indicators: {
@@ -81,6 +86,11 @@ const storage: Storage = {
             ETCO2: 0,
             RR: 0,
             FiCO2: 0
+        },
+        recordDuration: {
+            startTime: null,
+            endTime: null,
+            upload: false
         }
     }
 }
