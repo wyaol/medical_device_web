@@ -12,3 +12,9 @@ export const getCurrentPatient = () => {
         return null;
     }
 }
+
+export const getCO2RecordMinioObjectName = (startTime: Date | null, endTime: Date | null) => {
+    const startTimeStr = startTime?.toISOString().replace(/[-:]/g, '').slice(0, 14);
+    const endTimeStr = endTime?.toISOString().replace(/[-:]/g, '').slice(0, 14);
+    return `${getCurrentPatient().patient_id}/${startTimeStr}-${endTimeStr}.cdr`;
+}

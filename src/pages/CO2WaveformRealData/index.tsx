@@ -1,14 +1,14 @@
 import React, {useEffect, useRef} from 'react';
 import {useGlobalState} from '../../config/GlobalStateContext';
-import {connectCO2SerialDevice, startDataCollector, stopDataCollector} from '../../service/co2SerialService';
+import {getCO2RecordMinioObjectName} from "../../utils";
+import {connectCO2SerialDevice, startDataCollector, stopDataCollector} from '../../service/co2DataService';
+import {putObjectByPresignedUrl} from '../../service/objectStoreService'
 import ReactEcharts from "echarts-for-react";
 import {Button, message} from "antd";
-import axios from "axios";
 import storage from '../../storage';
-import request from '../../config/request';
-import {AxiosResponse} from 'axios';
-
 import CO2RealDataTable from '../../components/CO2RealDataTable';
+import * as rrweb from 'rrweb';
+import Gzip from 'gzip-js';
 
 const renderCO2WaveformOption = (data: {
     co2Waveform: number[],
@@ -62,40 +62,127 @@ const renderCO2WaveformOption = (data: {
     },
 })
 
+
+const compressEvents = (events: any[]): Blob | null => {
+    try {
+        const eventsJson = JSON.stringify(events);
+        const encodedData = new TextEncoder().encode(eventsJson);
+        const compressedData = new Uint8Array(Gzip.zip(encodedData));
+        return new Blob([compressedData], {type: 'application/octet-stream'});
+    } catch (error) {
+        console.error('Error compressing events:', error);
+        return null;
+    }
+}
+const startRecord = (events: any[]) => {
+    return rrweb.record({
+        // emit 回调函数
+        emit: (event) => {
+            events.push(event)
+        },
+        blockClass: 'rr-block',
+        blockSelector: 'rr-block',
+        // 配置抽样策略
+        sampling: {
+            // 不录制鼠标移动事件
+            mousemove: false,
+            // 定义不录制的鼠标交互事件类型，可以细粒度的开启或关闭对应交互录制
+            mouseInteraction: {
+                MouseUp: false,
+                MouseDown: false,
+                Click: false,
+                ContextMenu: false,
+                DblClick: false,
+                Focus: false,
+                Blur: false,
+                TouchStart: false,
+                TouchEnd: false,
+            },
+            // 设置滚动事件的触发频率
+            scroll: 150, // 每 150ms 最多触发一次
+            media: 800,
+            // 设置输入事件的录制时机
+            input: 'last' // 连续输入时，只录制最终值
+        },
+        slimDOMOptions: {
+            script: false,
+            comment: false,
+            headFavicon: false,
+            headWhitespace: false,
+            headMetaDescKeywords: false,
+            headMetaSocial: false,
+            headMetaRobots: false,
+            headMetaHttpEquiv: false,
+            headMetaAuthorship: false,
+            headMetaVerification: false,
+        }
+    });
+}
+
 const CO2WaveformRealData = () => {
+    const bucketName = 'co2-serial-record-bucket';
     const {globalState, setGlobalState} = useGlobalState();
     const chartRef = useRef(null);
-
+    const recordingRef = useRef<any>(null);
+    const eventsRef = useRef<any[]>([]);
+    const elementsRef = useRef<NodeListOf<HTMLElement>>(document.querySelectorAll('.rr-block') as NodeListOf<HTMLElement>);
     const start = () => {
         const nowTime = new Date();
-        startDataCollector(storage.deviceId).then(() => {
-            setGlobalState({
-                ...globalState,
-                dataCollectionPeriod: {
-                    ...globalState.dataCollectionPeriod,
-                    startTime: nowTime
-                }
-            })
-            message.success('开始采集');
-        }).catch((error: Error) => {
+        startDataCollector(storage.deviceId).then(async () => {
+                setGlobalState({
+                    ...globalState,
+                    co2WaveformData: {
+                        ...globalState.co2WaveformData,
+                        recordDuration: {
+                            ...globalState.co2WaveformData.recordDuration,
+                            startTime: nowTime,
+                            endTime: null
+                        }
+                    }
+                })
+                message.success('开始采集');
+            }
+        ).catch((error: Error) => {
             message.error(error.message);
         })
+        // 隐藏不必要的元素
+        elementsRef.current.forEach(element => {
+            element.style.display = 'none';
+        });
+        // 开始录制
+        recordingRef.current = startRecord(eventsRef.current);
     }
 
-    const stop = () => {
+    const stop = async () => {
         const nowTime = new Date();
-        stopDataCollector(storage.deviceId, globalState.dataCollectionPeriod.startTime, nowTime).then(() => {
-            setGlobalState({
-                ...globalState,
-                dataCollectionPeriod: {
-                    ...globalState.dataCollectionPeriod,
-                    endTime: nowTime
+        const startTime = globalState.co2WaveformData.recordDuration.startTime;
+        const fileName = getCO2RecordMinioObjectName(startTime, nowTime);
+
+        // 停止录制
+        if (recordingRef.current) {
+            recordingRef.current();
+        }
+        // 复原元素
+        elementsRef.current.forEach(element => {
+            element.style.display = 'block';
+        });
+
+        const presignedUrl = await stopDataCollector(storage.deviceId, startTime, nowTime, fileName)
+        setGlobalState({
+            ...globalState,
+            co2WaveformData: {
+                ...globalState.co2WaveformData,
+                recordDuration: {
+                    ...globalState.co2WaveformData.recordDuration,
+                    endTime: nowTime,
                 }
-            })
-            message.success('停止采集');
-        }).catch((error: Error) => {
-            message.error(error.message);
+            }
         })
+        message.success('停止采集');
+        const data = compressEvents(eventsRef.current)
+        if (data) {
+            await putObjectByPresignedUrl(presignedUrl, fileName, data);
+        }
     }
 
     useEffect(() => {
@@ -111,7 +198,7 @@ const CO2WaveformRealData = () => {
                 <Button type="primary" onClick={() => {
                 }} style={{marginLeft: '50px'}}>设备扫描</Button>
             </div>
-            <div style={{width: "100%", display: "flex"}}>
+            <div style={{width: "100%", display: "flex"}} className="co2-record">
                 <div style={{width: "100%"}}>
                     <CO2RealDataTable data={globalState.co2WaveformData.indicators}></CO2RealDataTable>
                     <ReactEcharts
