@@ -2,6 +2,11 @@ import axios from "axios";
 import request from "../config/request";
 import {getCurrentPatient} from "../utils";
 
+export const scanCO2SerialDevice = async (deviceId: string) => {
+    const response = await request.get(`/co2_serial_device/${deviceId}/scan_serial`);
+    return response;
+}
+
 export const connectCO2SerialDevice = async (deviceId: string, port: string) => {
     const res = await request.post(`/co2_serial_device/${deviceId}/connect`, {uuid: port});
     if (res.status !== 200) {
@@ -39,7 +44,7 @@ export const getAllDataCollectionPeriods = async () => {
     }
 }
 
-export const getCO2DataRecordPresignedUrl = async (filename:string) => {
+export const getCO2DataRecordPresignedUrl = async (filename: string) => {
     let presignedUrl: string = '';
     await request.post(`/co2_serial/co2_data_record`, {
         'file_name': filename

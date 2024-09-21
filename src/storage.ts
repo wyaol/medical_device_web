@@ -12,6 +12,13 @@ export interface Storage {
         bluetooth: Record<string, string>[],
         data: Record<string, number[]>
     },
+    co2Serial: {
+        connect: {
+            success: boolean
+            message: string
+        },
+        devices: Record<string, string>[],
+    },
     co2WaveformData: {
         curves: {
             co2Waveform: number[],
@@ -43,7 +50,7 @@ const storage: Storage = {
         startTime: null,
         endTime: null,
     },
-    deviceId: "190070690681122",
+    deviceId: "5288373550532",
     plusWave: {
         connect: {
             success: false,
@@ -57,6 +64,13 @@ const storage: Storage = {
             'microcirculation': new Array(len).fill(0),
             'oxygen_saturation': new Array(len).fill(0),
         }
+    },
+    co2Serial: {
+        connect: {
+            success: false,
+            message: ""
+        },
+        devices: [],
     },
     co2WaveformData: {
         curves: {

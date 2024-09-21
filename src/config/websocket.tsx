@@ -1,6 +1,6 @@
 import React, {useEffect} from 'react';
 import {useGlobalState} from './GlobalStateContext';
-import {Storage} from '../storage';
+import {Storage} from '../storage'
 
 const WebSocketComponent = () => {
     const {globalState, setGlobalState} = useGlobalState();
@@ -22,11 +22,10 @@ const WebSocketComponent = () => {
             const data = JSON.parse(event.data);
             switch (data.event) {
                 case 'gateway_device_id':
-                    console.log(data);
-                    setGlobalState((prevState: Storage) => ({
-                        ...prevState,
-                        deviceId: data.data
-                    }));
+                    setGlobalState({
+                        ...globalState,
+                        deviceId: data.data.toString()
+                    });
                     break;
                 case 'plus_wave_bluetooth_list':
                     setGlobalState((prevState: Storage) => ({
@@ -66,6 +65,15 @@ const WebSocketComponent = () => {
                         }
                     }));
                     break;
+                case 'co2_serial_devices_list':
+                    setGlobalState((prevState: Storage) => ({
+                        ...prevState,
+                        co2Serial: {
+                            ...prevState.co2Serial,
+                            devices: data.data
+                        }
+                    }));
+                    break;
                 case 'transfer_co2_waveform_data':
                     const responseData = data.data;
                     const curvesData = globalState.co2WaveformData.curves;
@@ -98,6 +106,7 @@ const WebSocketComponent = () => {
                 default:
                     console.log(data.event);
             }
+
         };
 
         socket.onclose = () => {
