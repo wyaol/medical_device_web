@@ -1,14 +1,20 @@
-import React, {useEffect, useRef} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
+import {AxiosResponse} from 'axios';
 import {useGlobalState} from '../../config/GlobalStateContext';
 import {getCO2RecordMinioObjectName} from "../../utils";
-import {connectCO2SerialDevice, startDataCollector, stopDataCollector} from '../../service/co2DataService';
 import {putObjectByPresignedUrl} from '../../service/objectStoreService'
 import ReactEcharts from "echarts-for-react";
-import {Button, message} from "antd";
+import {Button, message, Modal, List, Alert} from "antd";
 import storage from '../../storage';
 import CO2RealDataTable from '../../components/CO2RealDataTable';
 import * as rrweb from 'rrweb';
 import Gzip from 'gzip-js';
+import {
+    connectCO2SerialDevice,
+    scanCO2SerialDevice,
+    startDataCollector,
+    stopDataCollector
+} from '../../service/co2DataService';
 
 const renderCO2WaveformOption = (data: {
     co2Waveform: number[],
@@ -126,6 +132,13 @@ const CO2WaveformRealData = () => {
     const recordingRef = useRef<any>(null);
     const eventsRef = useRef<any[]>([]);
     const elementsRef = useRef<NodeListOf<HTMLElement>>(document.querySelectorAll('.rr-block') as NodeListOf<HTMLElement>);
+    const [visible, setVisible] = useState(false);
+    const [devices, setDevices] = useState<Record<string, string>[]>([]);
+    const [scanLoading, setScanLoading] = useState(false);
+    const [connectLoading, setConnectLoading] = useState(false);
+    const [connectStatus, setConnectStatus] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+
     const start = () => {
         const nowTime = new Date();
         startDataCollector(storage.deviceId).then(async () => {
@@ -152,7 +165,6 @@ const CO2WaveformRealData = () => {
         // 开始录制
         recordingRef.current = startRecord(eventsRef.current);
     }
-
     const stop = async () => {
         const nowTime = new Date();
         const startTime = globalState.co2WaveformData.recordDuration.startTime;
@@ -184,19 +196,81 @@ const CO2WaveformRealData = () => {
             await putObjectByPresignedUrl(presignedUrl, fileName, data);
         }
     }
-
     useEffect(() => {
         // @ts-ignore
         chartRef?.current?.getEchartsInstance().setOption(renderCO2WaveformOption(globalState.co2WaveformData.curves));
-    }, [globalState.co2WaveformData.curves])
+    }, [globalState.co2WaveformData.curves, visible])
+
+    useEffect(() => {
+        setDevices(globalState.co2Serial.devices);
+        setConnectStatus(globalState.co2Serial.connect.success);
+    }, [globalState.co2Serial.devices, globalState.co2Serial.connect.success])
+
+    useEffect(() => {
+        setDevices(globalState.co2Serial.devices);
+        setScanLoading(false);
+    }, [globalState.co2Serial.devices])
+
+    useEffect(() => {
+        if (storage.plusWave.connect.message !== '') {
+            alert(globalState.co2Serial.connect.message)
+        } else {
+            setConnectStatus(globalState.co2Serial.connect.success);
+        }
+        setConnectLoading(false);
+    }, [globalState.co2Serial.connect])
 
     return (
         <div style={{display: "flex", flexDirection: "column"}}>
             <div style={{display: "flex", justifyContent: "flex-start", alignItems: "center"}}>
                 <Button onClick={() => start()}>开始采集</Button>
                 <Button onClick={() => stop()} style={{marginLeft: '10px'}}>停止采集</Button>
-                <Button type="primary" onClick={() => {
-                }} style={{marginLeft: '50px'}}>设备扫描</Button>
+                <Button type="primary" onClick={() => setVisible(true)} style={{marginLeft: '50px'}}>设备管理</Button>
+                <Modal
+                    title="设备管理"
+                    width={800}
+                    style={{top: '20vh'}}
+                    open={visible}
+                    onOk={() => {
+                        setVisible(false)
+                    }}
+                    onCancel={() => {
+                        setVisible(false)
+                    }}
+                >
+                    <Button type="primary"
+                            style={{marginLeft: '50px'}}
+                            loading={scanLoading}
+                            onClick={async () => {
+                                setScanLoading(true);
+                                await scanCO2SerialDevice(storage.deviceId)
+                                    .then((res: AxiosResponse<any>) => {
+                                        if (res.status !== 200) {
+                                            throw new Error('Scan failed');
+                                        }
+                                    })
+                                    .catch((err) => {
+                                        setScanLoading(false);
+                                        setError(err.message);
+                                    });
+                            }}
+                    >设备扫描</Button>
+                    <List
+                        itemLayout="horizontal"
+                        dataSource={devices}
+                        renderItem={(item) => (
+                            <List.Item
+                                key={item.port}
+                                actions={[<Button onClick={() => {}}>连接</Button>]}
+                            >
+                                <List.Item.Meta
+                                    title={`端口：${item.port}`}
+                                    description={<><p>描述：{item.desc}</p><p>硬件标识：{item.hwid}</p></>}
+                                />
+                            </List.Item>
+                        )}
+                    />
+                </Modal>
             </div>
             <div style={{width: "100%", display: "flex"}} className="co2-record">
                 <div style={{width: "100%"}}>
