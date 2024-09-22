@@ -19,7 +19,8 @@ export const disconnectCO2SerialDevice = async (deviceId: string) => {
 
 export const startDataCollector = async (deviceId: string) => {
     if (getCurrentPatient()) {
-        await request.post(`/co2_serial_device/${deviceId}/start_collect`);
+        const response = await request.post(`/co2_serial_device/${deviceId}/start_collect`);
+        return response;
     } else {
         throw new Error('请绑定病人');
     }

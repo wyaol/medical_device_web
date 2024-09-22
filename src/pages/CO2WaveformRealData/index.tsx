@@ -83,12 +83,11 @@ const compressEvents = (events: any[]): Blob | null => {
 }
 const startRecord = (events: any[]) => {
     return rrweb.record({
-        // emit 回调函数
         emit: (event) => {
             events.push(event)
         },
-        blockClass: 'rr-block',
-        blockSelector: 'rr-block',
+        // 对 canvas 进行录制
+        recordCanvas: true,
         // 配置抽样策略
         sampling: {
             // 不录制鼠标移动事件
@@ -133,31 +132,31 @@ const CO2WaveformRealData = () => {
     const recordingRef = useRef<any>(null);
     const eventsRef = useRef<any[]>([]);
     const elementsRef = useRef<NodeListOf<HTMLElement>>(document.querySelectorAll('.rr-block') as NodeListOf<HTMLElement>);
-    const [visible, setVisible] = useState(false);
+    const contextMenuListenerRef = useRef<(e: MouseEvent) => void>();
+    const [modelVisible, setModelVisible] = useState<boolean>(false);
+    const [collectStatus, setCollectStatus] = useState<boolean>(false);
     const [devices, setDevices] = useState<Record<string, string>[]>([]);
-    const [scanLoading, setScanLoading] = useState(false);
-    const [connectLoading, setConnectLoading] = useState(false);
+    const [scanLoading, setScanLoading] = useState<boolean>(false);
+    const [connectLoading, setConnectLoading] = useState<boolean>(false);
     const [connectedDevicePort, setConnectedDevicePort] = useState<string | null>(null);
     const [error, setError] = useState<string | null>(null);
 
-    const start = () => {
-        const nowTime = new Date();
-        startDataCollector(storage.deviceId).then(async () => {
-                setGlobalState({
-                    ...globalState,
-                    co2WaveformData: {
-                        ...globalState.co2WaveformData,
-                        recordDuration: {
-                            ...globalState.co2WaveformData.recordDuration,
-                            startTime: nowTime,
-                            endTime: null
-                        }
-                    }
-                })
-                message.success('开始采集');
+    const start = async () => {
+        const startTime = new Date();
+        await startDataCollector(storage.deviceId)
+            .catch((error: Error) => {
+                message.error(error.message);
+            })
+        setGlobalState({
+            ...globalState,
+            co2WaveformData: {
+                ...globalState.co2WaveformData,
+                recordDuration: {
+                    ...globalState.co2WaveformData.recordDuration,
+                    startTime: startTime,
+                    endTime: null
+                }
             }
-        ).catch((error: Error) => {
-            message.error(error.message);
         })
         // 隐藏不必要的元素
         elementsRef.current.forEach(element => {
@@ -167,9 +166,9 @@ const CO2WaveformRealData = () => {
         recordingRef.current = startRecord(eventsRef.current);
     }
     const stop = async () => {
-        const nowTime = new Date();
+        const endTime = new Date();
         const startTime = globalState.co2WaveformData.recordDuration.startTime;
-        const fileName = getCO2RecordMinioObjectName(startTime, nowTime);
+        const fileName = getCO2RecordMinioObjectName(startTime, endTime);
 
         // 停止录制
         if (recordingRef.current) {
@@ -179,19 +178,18 @@ const CO2WaveformRealData = () => {
         elementsRef.current.forEach(element => {
             element.style.display = 'block';
         });
-
-        const presignedUrl = await stopDataCollector(storage.deviceId, startTime, nowTime, fileName)
+        const presignedUrl = await stopDataCollector(storage.deviceId, startTime, endTime, fileName)
         setGlobalState({
             ...globalState,
             co2WaveformData: {
                 ...globalState.co2WaveformData,
                 recordDuration: {
                     ...globalState.co2WaveformData.recordDuration,
-                    endTime: nowTime,
+                    startTime: null,
+                    endTime: null,
                 }
             }
         })
-        message.success('停止采集');
         const data = compressEvents(eventsRef.current)
         if (data) {
             await putObjectByPresignedUrl(presignedUrl, fileName, data);
@@ -200,7 +198,15 @@ const CO2WaveformRealData = () => {
     useEffect(() => {
         // @ts-ignore
         chartRef?.current?.getEchartsInstance().setOption(renderCO2WaveformOption(globalState.co2WaveformData.curves));
-    }, [globalState.co2WaveformData.curves, visible])
+    }, [globalState.co2WaveformData.curves, modelVisible])
+
+    useEffect(() => {
+        if (globalState.co2WaveformData.recordDuration.startTime !== null) {
+            setCollectStatus(true);
+        } else {
+            setCollectStatus(false);
+        }
+    }, [globalState.co2WaveformData.recordDuration.startTime])
 
     useEffect(() => {
         setDevices(globalState.co2Serial.devices);
@@ -220,23 +226,55 @@ const CO2WaveformRealData = () => {
         setConnectLoading(false);
     }, [globalState.co2Serial.connect])
 
+    useEffect(() => {
+        // 在组件挂载时禁用鼠标右键
+        const handleContextMenu = (e: MouseEvent) => e.preventDefault();
+        document.addEventListener('contextmenu', handleContextMenu);
+
+        // 存储监听器以便在卸载时移除
+        contextMenuListenerRef.current = handleContextMenu;
+
+        // 清理函数，在组件卸载时移除事件监听器
+        return () => {
+            if (contextMenuListenerRef.current) {
+                document.removeEventListener('contextmenu', contextMenuListenerRef.current);
+            }
+        };
+    }, []); // 空依赖数组确保此effect仅运行一次
+
     return (
-        <div style={{display: "flex", flexDirection: "column"}}>
-            <div style={{display: "flex", justifyContent: "flex-start", alignItems: "center"}}>
-                <Button onClick={() => start()}>开始采集</Button>
-                <Button onClick={() => stop()} style={{marginLeft: '10px'}}>停止采集</Button>
-                <Button type="primary" onClick={() => setVisible(true)} style={{marginLeft: '50px'}}>设备管理</Button>
+        <div
+            className={"co2-waveform-real-data-container"}
+            style={{display: "flex", flexDirection: "column"}}
+        >
+            <Flex justify={"space-between"} align={"center"}>
+                <Button
+                    disabled={collectStatus}
+                    type="primary"
+                    onClick={() => setModelVisible(true)}
+                    style={{marginRight: '50px'}}
+                >设备管理</Button>
+                <Flex>
+                    <Button
+                        disabled={collectStatus}
+                        onClick={() => start()}
+                    >开始采集</Button>
+                    <Button
+                        onClick={() => stop()}
+                        style={{marginLeft: '20px'}}
+                    >停止采集</Button>
+                </Flex>
                 <Modal
                     title={(
                         <div style={{display: 'flex', justifyContent: 'center', alignItems: 'center'}}>设备管理</div>)}
                     width={800}
                     style={{top: '20vh'}}
-                    open={visible}
+                    open={modelVisible}
                     onOk={() => {
-                        setVisible(false)
+                        setModelVisible(false)
                     }}
                     onCancel={() => {
-                        setVisible(false)
+                        setModelVisible(false)
                     }}
                 >
                     <Flex
@@ -308,7 +346,7 @@ const CO2WaveformRealData = () => {
                         )}
                     />
                 </Modal>
-            </div>
+            </Flex>
             <div style={{width: "100%", display: "flex"}} className="co2-record">
                 <div style={{width: "100%"}}>
                     <CO2RealDataTable data={globalState.co2WaveformData.indicators}></CO2RealDataTable>
