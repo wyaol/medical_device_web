@@ -10,8 +10,9 @@ import CO2RealDataTable from '../../components/CO2RealDataTable';
 import * as rrweb from 'rrweb';
 import Gzip from 'gzip-js';
 import {
-    connectCO2SerialDevice,
     scanCO2SerialDevice,
+    connectCO2SerialDevice,
+    disconnectCO2SerialDevice,
     startDataCollector,
     stopDataCollector
 } from '../../service/co2DataService';
@@ -214,9 +215,8 @@ const CO2WaveformRealData = () => {
     useEffect(() => {
         if (storage.plusWave.connect.message !== '') {
             alert(globalState.co2Serial.connect.message)
-        } else {
-            setConnectedDevicePort(globalState.co2Serial.connect.port);
         }
+        setConnectedDevicePort(globalState.co2Serial.connect.port);
         setConnectLoading(false);
     }, [globalState.co2Serial.connect])
 
@@ -284,7 +284,16 @@ const CO2WaveformRealData = () => {
                                                         setConnectLoading(false);
                                                     });
                                             } else {
-
+                                                await disconnectCO2SerialDevice(storage.deviceId)
+                                                    .then((res: AxiosResponse<any>) => {
+                                                        if (res.status !== 200) {
+                                                            throw new Error('Disconnect failed');
+                                                        }
+                                                        setConnectedDevicePort(null)
+                                                    })
+                                                    .catch((err) => {
+                                                        setError(err.message);
+                                                    });
                                             }
                                         }}
                                     >{connectedDevicePort !== null && connectedDevicePort === item.port ? "断开连接" : "连接"}

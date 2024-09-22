@@ -12,6 +12,11 @@ export const connectCO2SerialDevice = async (deviceId: string, port: string) => 
     return res;
 }
 
+export const disconnectCO2SerialDevice = async (deviceId: string) => {
+    const res = await request.post(`/co2_serial_device/${deviceId}/disconnect`);
+    return res;
+}
+
 export const startDataCollector = async (deviceId: string) => {
     if (getCurrentPatient()) {
         await request.post(`/co2_serial_device/${deviceId}/start_collect`);
