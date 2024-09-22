@@ -22,6 +22,7 @@ const WebSocketComponent = () => {
             const data = JSON.parse(event.data);
             switch (data.event) {
                 case 'gateway_device_id':
+                    console.log('Gateway device ID:', data.data);
                     setGlobalState({
                         ...globalState,
                         deviceId: data.data.toString()
@@ -71,6 +72,15 @@ const WebSocketComponent = () => {
                         co2Serial: {
                             ...prevState.co2Serial,
                             devices: data.data
+                        }
+                    }));
+                    break;
+                case 'co2_serial_devices_connect':
+                    setGlobalState((prevState: Storage) => ({
+                        ...prevState,
+                        co2Serial: {
+                            ...prevState.co2Serial,
+                            connect: data.data
                         }
                     }));
                     break;

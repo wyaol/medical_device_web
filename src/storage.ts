@@ -27,7 +27,7 @@ export interface Storage {
     },
     co2Serial: {
         connect: {
-            success: boolean
+            port: string | null
             message: string
         },
         devices: Record<string, string>[],
@@ -63,7 +63,7 @@ const storage: Storage = {
         startTime: null,
         endTime: null,
     },
-    deviceId: "5288373550532",
+    deviceId: "5288373550535",
     plusWave: {
         connect: {
             success: false,
@@ -80,7 +80,7 @@ const storage: Storage = {
     },
     co2Serial: {
         connect: {
-            success: false,
+            port: null,
             message: ""
         },
         devices: [],

@@ -4,7 +4,7 @@ import {useGlobalState} from '../../config/GlobalStateContext';
 import {getCO2RecordMinioObjectName} from "../../utils";
 import {putObjectByPresignedUrl} from '../../service/objectStoreService'
 import ReactEcharts from "echarts-for-react";
-import {Button, message, Modal, List, Alert} from "antd";
+import {Button, message, Modal, List, Alert, Flex} from "antd";
 import storage from '../../storage';
 import CO2RealDataTable from '../../components/CO2RealDataTable';
 import * as rrweb from 'rrweb';
@@ -136,7 +136,7 @@ const CO2WaveformRealData = () => {
     const [devices, setDevices] = useState<Record<string, string>[]>([]);
     const [scanLoading, setScanLoading] = useState(false);
     const [connectLoading, setConnectLoading] = useState(false);
-    const [connectStatus, setConnectStatus] = useState(false);
+    const [connectedDevicePort, setConnectedDevicePort] = useState<string | null>(null);
     const [error, setError] = useState<string | null>(null);
 
     const start = () => {
@@ -203,8 +203,8 @@ const CO2WaveformRealData = () => {
 
     useEffect(() => {
         setDevices(globalState.co2Serial.devices);
-        setConnectStatus(globalState.co2Serial.connect.success);
-    }, [globalState.co2Serial.devices, globalState.co2Serial.connect.success])
+        setConnectedDevicePort(globalState.co2Serial.connect.port);
+    }, [globalState.co2Serial.devices, globalState.co2Serial.connect.port])
 
     useEffect(() => {
         setDevices(globalState.co2Serial.devices);
@@ -215,7 +215,7 @@ const CO2WaveformRealData = () => {
         if (storage.plusWave.connect.message !== '') {
             alert(globalState.co2Serial.connect.message)
         } else {
-            setConnectStatus(globalState.co2Serial.connect.success);
+            setConnectedDevicePort(globalState.co2Serial.connect.port);
         }
         setConnectLoading(false);
     }, [globalState.co2Serial.connect])
@@ -227,7 +227,8 @@ const CO2WaveformRealData = () => {
                 <Button onClick={() => stop()} style={{marginLeft: '10px'}}>停止采集</Button>
                 <Button type="primary" onClick={() => setVisible(true)} style={{marginLeft: '50px'}}>设备管理</Button>
                 <Modal
-                    title="设备管理"
+                    title={(
+                        <div style={{display: 'flex', justifyContent: 'center', alignItems: 'center'}}>设备管理</div>)}
                     width={800}
                     style={{top: '20vh'}}
                     open={visible}
@@ -238,30 +239,57 @@ const CO2WaveformRealData = () => {
                         setVisible(false)
                     }}
                 >
-                    <Button type="primary"
-                            style={{marginLeft: '50px'}}
-                            loading={scanLoading}
-                            onClick={async () => {
-                                setScanLoading(true);
-                                await scanCO2SerialDevice(storage.deviceId)
-                                    .then((res: AxiosResponse<any>) => {
-                                        if (res.status !== 200) {
-                                            throw new Error('Scan failed');
-                                        }
-                                    })
-                                    .catch((err) => {
-                                        setScanLoading(false);
-                                        setError(err.message);
-                                    });
-                            }}
-                    >设备扫描</Button>
+                    <Flex
+                        gap="middle"
+                        vertical={false}
+                        justify="space-between" // 将内容水平分布
+                        align="center" // 垂直居中对齐
+                    >
+                        <p>可连接CO2串口设备列表</p>
+                        <Button type="primary"
+                                style={{marginLeft: '50px'}}
+                                loading={scanLoading}
+                                onClick={async () => {
+                                    setScanLoading(true);
+                                    await scanCO2SerialDevice(storage.deviceId)
+                                        .then((res: AxiosResponse<any>) => {
+                                            if (res.status !== 200) {
+                                                throw new Error('Scan failed');
+                                            }
+                                        })
+                                        .catch((err) => {
+                                            setScanLoading(false);
+                                            setError(err.message);
+                                        });
+                                }}
+                        >设备扫描</Button>
+                    </Flex>
                     <List
                         itemLayout="horizontal"
                         dataSource={devices}
                         renderItem={(item) => (
                             <List.Item
                                 key={item.port}
-                                actions={[<Button onClick={() => {}}>连接</Button>]}
+                                actions={[
+                                    (connectedDevicePort === null || connectedDevicePort === item.port) &&
+                                    (<Button
+                                        loading={connectLoading}
+                                        danger={connectedDevicePort === item.port}
+                                        onClick={async () => {
+                                            if (connectedDevicePort === null) {
+                                                setConnectLoading(true);
+                                                await connectCO2SerialDevice(storage.deviceId, item.port)
+                                                    .catch((err) => {
+                                                        setError(err.message);
+                                                        setConnectLoading(false);
+                                                    });
+                                            } else {
+
+                                            }
+                                        }}
+                                    >{connectedDevicePort !== null && connectedDevicePort === item.port ? "断开连接" : "连接"}
+                                    </Button>)
+                                ]}
                             >
                                 <List.Item.Meta
                                     title={`端口：${item.port}`}
