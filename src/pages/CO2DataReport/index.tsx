@@ -36,17 +36,13 @@ const CO2DataReport = () => {
             return;
         }
         const presignedUrl = await getCO2DataRecordPresignedUrl(filePath);
-        console.log("presignedUrl:", presignedUrl)
         const recordBlob: Blob = await getObjectByPresignedUrl(presignedUrl);
-        console.log("blob:", recordBlob);
         const events = await decompressorEvents(recordBlob);
-        console.log("de:", events);
         const player = new rrwebPlayer({
             target: recordContainer, // 播放器渲染的位置
             // 配置项
             props: {
                 events: events,
-                blockClass: 'rr-block',
                 root: recordContainer, //回放界面渲染的位置
                 width: 1024,
                 height: 576,
@@ -54,7 +50,8 @@ const CO2DataReport = () => {
                 autoPlay: false, // 是否自动播放
                 speedOption: [1, 2, 4, 8], // 倍速播放可选值
                 triggerFocus: false, //回放时是否回放 focus 交互
-                mouseTail: false // 是否回放鼠标轨迹
+                mouseTail: false, // 是否回放鼠标轨迹
+                UNSAFE_replayCanvas: true,// 是否回放canvas内容
             },
         });
         player.play();
