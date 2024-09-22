@@ -8,10 +8,8 @@ export const scanCO2SerialDevice = async (deviceId: string) => {
 }
 
 export const connectCO2SerialDevice = async (deviceId: string, port: string) => {
-    const res = await request.post(`/co2_serial_device/${deviceId}/connect`, {uuid: port});
-    if (res.status !== 200) {
-        throw new Error('Connection failed');
-    }
+    const res = await request.post(`/co2_serial_device/${deviceId}/connect`, {port: port});
+    return res;
 }
 
 export const startDataCollector = async (deviceId: string) => {
