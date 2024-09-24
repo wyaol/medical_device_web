@@ -1,14 +1,16 @@
-import {Button, message, Select} from 'antd';
+import {Button, message, Select, Flex} from 'antd';
 import React, {useCallback, useEffect, useState} from 'react';
 import {getAllDataCollectionPeriods, getCO2DataRecordPresignedUrl} from '../../service/co2DataService';
 import rrwebPlayer from 'rrweb-player';
 import {getObjectByPresignedUrl} from '../../service/objectStoreService'
 import {getCO2RecordMinioObjectName} from "../../utils";
 import Gzip from 'gzip-js';
+import 'rrweb/dist/rrweb.min.css';
+import 'rrweb-player/dist/style.css';
 
 const decompressorEvents = async (blob: Blob) => {
     try {
-        const arrayBuffer = new Uint8Array( await blob.arrayBuffer());
+        const arrayBuffer = new Uint8Array(await blob.arrayBuffer());
         const decompressedData = Gzip.unzip(arrayBuffer);
         const decompressedString = new TextDecoder().decode(new Uint8Array(decompressedData));
         return JSON.parse(decompressedString);
@@ -19,6 +21,7 @@ const decompressorEvents = async (blob: Blob) => {
 }
 const CO2DataReport = () => {
     const recordContainer = document.querySelector('.co2-record-container') as HTMLElement;
+    const playerContainer = document.querySelector('.co2-player-container') as HTMLElement;
     const [dataCollectionPeriods, setDataCollectionPeriods] = useState([]);
     const [filePath, setFilePath] = useState<string>('');
     useEffect(() => {
@@ -39,27 +42,21 @@ const CO2DataReport = () => {
         const recordBlob: Blob = await getObjectByPresignedUrl(presignedUrl);
         const events = await decompressorEvents(recordBlob);
         const player = new rrwebPlayer({
-            target: recordContainer, // 播放器渲染的位置
-            // 配置项
+            target: playerContainer,
             props: {
                 events: events,
-                root: recordContainer, //回放界面渲染的位置
-                width: 1024,
-                height: 576,
-                showController: true, // 是否显示播放器控制UI
-                autoPlay: false, // 是否自动播放
-                speedOption: [1, 2, 4, 8], // 倍速播放可选值
-                triggerFocus: false, //回放时是否回放 focus 交互
-                mouseTail: false, // 是否回放鼠标轨迹
-                UNSAFE_replayCanvas: true,// 是否回放canvas内容
+                width: 1580,
+                height: 720,
+                autoPlay: false,
+                mouseTail: false,
+                UNSAFE_replayCanvas: true,
             },
         });
         player.play();
     }, [filePath]);
     return (
-        <div style={{display: "flex", flexDirection: "column"}}>
-            <div className="select-container"
-                 style={{display: "flex", justifyContent: "flex-start", alignItems: "center"}}>
+        <Flex vertical={true} justify={"center"}>
+            <Flex className="select-container" justify={"flex-start"} align={"center"}>
                 <label>选择采集时间段: </label>
                 <Select
                     className="select-dropdown"
@@ -74,9 +71,9 @@ const CO2DataReport = () => {
                 <Button type="primary" onClick={genResult} className="generate-report-button">
                     生成报告
                 </Button>
-            </div>
-            <div className="co2-record-container" style={{width: "100%", height: "600px"}}/>
-        </div>
+            </Flex>
+            <div className="co2-player-container"/>
+        </Flex>
     );
 };
 

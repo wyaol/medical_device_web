@@ -198,7 +198,7 @@ const CO2WaveformRealData = () => {
     useEffect(() => {
         // @ts-ignore
         chartRef?.current?.getEchartsInstance().setOption(renderCO2WaveformOption(globalState.co2WaveformData.curves));
-    }, [globalState.co2WaveformData.curves, modelVisible])
+    }, [globalState.co2WaveformData, modelVisible])
 
     useEffect(() => {
         if (globalState.co2WaveformData.recordDuration.startTime !== null) {
@@ -258,11 +258,11 @@ const CO2WaveformRealData = () => {
                     <Button
                         disabled={collectStatus}
                         onClick={() => start()}
-                    >开始采集</Button>
+                    >开始记录</Button>
                     <Button
                         onClick={() => stop()}
                         style={{marginLeft: '20px'}}
-                    >停止采集</Button>
+                    >停止记录</Button>
                 </Flex>
                 <Modal
                     title={(
