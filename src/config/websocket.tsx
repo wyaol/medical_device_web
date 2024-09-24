@@ -22,7 +22,6 @@ const WebSocketComponent = () => {
             const data = JSON.parse(event.data);
             switch (data.event) {
                 case 'gateway_device_id':
-                    console.log('Gateway device ID:', data.data);
                     setGlobalState({
                         ...globalState,
                         deviceId: data.data.toString()
@@ -90,11 +89,11 @@ const WebSocketComponent = () => {
                     const indicatorsData = globalState.co2WaveformData.indicators;
                     let co2Waveform = responseData['co2_waveform'];
                     let dpiInfo = responseData['dpi_info'];
-                    curvesData.co2Waveform = [...curvesData.co2Waveform.slice(1), co2Waveform];
-                    curvesData.co2WaveformTime = [...curvesData.co2WaveformTime.slice(1), responseData['time']];
+                    curvesData.co2Waveform = curvesData.co2Waveform.length < 120 ? [...curvesData.co2Waveform, co2Waveform] : [...curvesData.co2Waveform.slice(1), co2Waveform];
+                    curvesData.co2WaveformTime = curvesData.co2WaveformTime.length < 120 ? [...curvesData.co2WaveformTime, responseData['time']] : [...curvesData.co2WaveformTime.slice(1), responseData['time']];
                     if (dpiInfo['render_etc']) {
-                        curvesData.etco2Waveform = [...curvesData.etco2Waveform.slice(1), dpiInfo['ETCO2']];
-                        curvesData.etco2WaveformTime = [...curvesData.etco2WaveformTime.slice(1), responseData['time']];
+                        curvesData.etco2Waveform = curvesData.etco2Waveform.length < 20 ? [...curvesData.etco2Waveform, dpiInfo['ETCO2']] : [...curvesData.etco2Waveform.slice(1), dpiInfo['ETCO2']];
+                        curvesData.etco2WaveformTime = curvesData.etco2WaveformTime.length < 20 ? [...curvesData.etco2WaveformTime, responseData['time']] : [...curvesData.etco2WaveformTime.slice(1), responseData['time']];
                     }
                     setGlobalState((prevState: Storage) => ({
                         ...prevState,
