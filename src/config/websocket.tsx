@@ -87,30 +87,33 @@ const WebSocketComponent = () => {
                     const responseData = data.data;
                     const curvesData = globalState.co2WaveformData.curves;
                     const indicatorsData = globalState.co2WaveformData.indicators;
-                    let co2Waveform = responseData['co2_waveform'];
-                    let dpiInfo = responseData['dpi_info'];
-                    curvesData.co2Waveform = curvesData.co2Waveform.length < 120 ? [...curvesData.co2Waveform, co2Waveform] : [...curvesData.co2Waveform.slice(1), co2Waveform];
-                    curvesData.co2WaveformTime = curvesData.co2WaveformTime.length < 120 ? [...curvesData.co2WaveformTime, responseData['time']] : [...curvesData.co2WaveformTime.slice(1), responseData['time']];
-                    if (dpiInfo['render_etc']) {
-                        curvesData.etco2Waveform = curvesData.etco2Waveform.length < 20 ? [...curvesData.etco2Waveform, dpiInfo['ETCO2']] : [...curvesData.etco2Waveform.slice(1), dpiInfo['ETCO2']];
-                        curvesData.etco2WaveformTime = curvesData.etco2WaveformTime.length < 20 ? [...curvesData.etco2WaveformTime, responseData['time']] : [...curvesData.etco2WaveformTime.slice(1), responseData['time']];
-                    }
-                    setGlobalState((prevState: Storage) => ({
-                        ...prevState,
-                        co2WaveformData: {
-                            ...prevState.co2WaveformData,
-                            curves: curvesData,
-                            indicators: {
-                                co2Waveform: co2Waveform ?? indicatorsData.co2Waveform,
-                                interval: responseData['interval'] ?? indicatorsData.interval,
-                                status: dpiInfo['status'] ?? indicatorsData.status,
-                                I_per_E: dpiInfo['I_per_E'] ?? indicatorsData.I_per_E,
-                                ETCO2: dpiInfo['ETCO2'] ?? indicatorsData.ETCO2,
-                                RR: dpiInfo['RR'] ?? indicatorsData.RR,
-                                FiCO2: dpiInfo['FiCO2'] ?? indicatorsData.FiCO2
-                            }
+                    const time = responseData['time'];
+                    if (!curvesData.co2WaveformTime.includes(time)) {
+                        let co2Waveform = responseData['co2_waveform'];
+                        let dpiInfo = responseData['dpi_info'];
+                        curvesData.co2Waveform = curvesData.co2Waveform.length < 120 ? [...curvesData.co2Waveform, co2Waveform] : [...curvesData.co2Waveform.slice(1), co2Waveform];
+                        curvesData.co2WaveformTime = curvesData.co2WaveformTime.length < 120 ? [...curvesData.co2WaveformTime, time] : [...curvesData.co2WaveformTime.slice(1), time];
+                        if (dpiInfo['render_etc']) {
+                            curvesData.etco2Waveform = curvesData.etco2Waveform.length < 40 ? [...curvesData.etco2Waveform, dpiInfo['ETCO2']] : [...curvesData.etco2Waveform.slice(1), dpiInfo['ETCO2']];
+                            curvesData.etco2WaveformTime = curvesData.etco2WaveformTime.length < 40 ? [...curvesData.etco2WaveformTime, time] : [...curvesData.etco2WaveformTime.slice(1), time];
                         }
-                    }));
+                        setGlobalState((prevState: Storage) => ({
+                            ...prevState,
+                            co2WaveformData: {
+                                ...prevState.co2WaveformData,
+                                curves: curvesData,
+                                indicators: {
+                                    co2Waveform: co2Waveform ?? indicatorsData.co2Waveform,
+                                    interval: responseData['interval'] ?? indicatorsData.interval,
+                                    status: dpiInfo['status'] ?? indicatorsData.status,
+                                    I_per_E: dpiInfo['I_per_E'] ?? indicatorsData.I_per_E,
+                                    ETCO2: dpiInfo['ETCO2'] ?? indicatorsData.ETCO2,
+                                    RR: dpiInfo['RR'] ?? indicatorsData.RR,
+                                    FiCO2: dpiInfo['FiCO2'] ?? indicatorsData.FiCO2
+                                }
+                            }
+                        }));
+                    }
                     break;
                 default:
                     console.log(data.event);

@@ -20,8 +20,6 @@ import {
 const renderCO2WaveformOption = (data: {
     co2Waveform: number[],
     co2WaveformTime: string[],
-    etco2Waveform: number[],
-    etco2WaveformTime: string[],
 }) => ({
     xAxis: {
         show: true,
@@ -40,7 +38,42 @@ const renderCO2WaveformOption = (data: {
             showSymbol: false,
             smooth: true,
             color: 'green'
-        },
+        }
+    ],
+    tooltip: {
+        trigger: 'axis',
+        axisPointer: {
+            type: 'cross',
+            label: {
+                backgroundColor: '#283b56'
+            }
+        }
+    },
+    toolbox: {
+        show: true,
+        feature: {
+            dataView: {readOnly: false},
+            restore: {},
+            saveAsImage: {}
+        }
+    },
+})
+
+
+const renderETCO2WaveformOption = (data: {
+    etco2Waveform: number[],
+    etco2WaveformTime: string[],
+}) => ({
+    xAxis: {
+        show: true,
+        type: 'category',
+    },
+    yAxis: {
+        type: 'value',
+        max: 25,
+        min: 0,
+    },
+    series: [
         {
             name: 'ETCO2',
             data: data.etco2Waveform.map((value, index) => [data.etco2WaveformTime[index], value]),
@@ -128,12 +161,14 @@ const startRecord = (events: any[]) => {
 const CO2WaveformRealData = () => {
     const bucketName = 'co2-serial-record-bucket';
     const {globalState, setGlobalState} = useGlobalState();
-    const chartRef = useRef(null);
+    const co2ChartRef = useRef(null);
+    const etco2ChartRef = useRef(null);
     const recordingRef = useRef<any>(null);
     const eventsRef = useRef<any[]>([]);
     const elementsRef = useRef<NodeListOf<HTMLElement>>(document.querySelectorAll('.rr-block') as NodeListOf<HTMLElement>);
     const contextMenuListenerRef = useRef<(e: MouseEvent) => void>();
     const [modelVisible, setModelVisible] = useState<boolean>(false);
+    const [indicators, setIndicators] = useState<any>(null);
     const [collectStatus, setCollectStatus] = useState<boolean>(false);
     const [devices, setDevices] = useState<Record<string, string>[]>([]);
     const [scanLoading, setScanLoading] = useState<boolean>(false);
@@ -144,26 +179,28 @@ const CO2WaveformRealData = () => {
     const start = async () => {
         const startTime = new Date();
         await startDataCollector(storage.deviceId)
+            .then(() => {
+                setGlobalState({
+                    ...globalState,
+                    co2WaveformData: {
+                        ...globalState.co2WaveformData,
+                        recordDuration: {
+                            ...globalState.co2WaveformData.recordDuration,
+                            startTime: startTime,
+                            endTime: null
+                        }
+                    }
+                })
+                // 隐藏不必要的元素
+                elementsRef.current.forEach(element => {
+                    element.style.display = 'none';
+                });
+                // 开始录制
+                recordingRef.current = startRecord(eventsRef.current);
+            })
             .catch((error: Error) => {
                 message.error(error.message);
             })
-        setGlobalState({
-            ...globalState,
-            co2WaveformData: {
-                ...globalState.co2WaveformData,
-                recordDuration: {
-                    ...globalState.co2WaveformData.recordDuration,
-                    startTime: startTime,
-                    endTime: null
-                }
-            }
-        })
-        // 隐藏不必要的元素
-        elementsRef.current.forEach(element => {
-            element.style.display = 'none';
-        });
-        // 开始录制
-        recordingRef.current = startRecord(eventsRef.current);
     }
     const stop = async () => {
         const endTime = new Date();
@@ -197,8 +234,16 @@ const CO2WaveformRealData = () => {
     }
     useEffect(() => {
         // @ts-ignore
-        chartRef?.current?.getEchartsInstance().setOption(renderCO2WaveformOption(globalState.co2WaveformData.curves));
-    }, [globalState.co2WaveformData, modelVisible])
+        co2ChartRef?.current?.getEchartsInstance().setOption(renderCO2WaveformOption({
+            co2Waveform: globalState.co2WaveformData.curves.co2Waveform,
+            co2WaveformTime: globalState.co2WaveformData.curves.co2WaveformTime
+        }));
+        // @ts-ignore
+        etco2ChartRef?.current?.getEchartsInstance().setOption(renderETCO2WaveformOption({
+            etco2Waveform: globalState.co2WaveformData.curves.etco2Waveform,
+            etco2WaveformTime: globalState.co2WaveformData.curves.etco2WaveformTime
+        }));
+    }, [globalState.co2WaveformData.curves])
 
     useEffect(() => {
         if (globalState.co2WaveformData.recordDuration.startTime !== null) {
@@ -225,6 +270,10 @@ const CO2WaveformRealData = () => {
         setConnectedDevicePort(globalState.co2Serial.connect.port);
         setConnectLoading(false);
     }, [globalState.co2Serial.connect])
+
+    useEffect(() => {
+        setIndicators(globalState.co2WaveformData.indicators)
+    }, [globalState.co2WaveformData.indicators])
 
     useEffect(() => {
         // 在组件挂载时禁用鼠标右键
@@ -347,17 +396,21 @@ const CO2WaveformRealData = () => {
                     />
                 </Modal>
             </Flex>
-            <div style={{width: "100%", display: "flex"}} className="co2-record">
-                <div style={{width: "100%"}}>
-                    <CO2RealDataTable data={globalState.co2WaveformData.indicators}></CO2RealDataTable>
-                    <ReactEcharts
-                        notMerge={true}
-                        ref={chartRef}
-                        option={renderCO2WaveformOption(globalState.co2WaveformData.curves)}
-                        style={{height: '500px', width: '100%'}}
-                    />
-                </div>
-            </div>
+            <CO2RealDataTable data={indicators}/>
+            <Flex justify={"space-between"} align={"center"}>
+                <ReactEcharts
+                    notMerge={true}
+                    ref={co2ChartRef}
+                    option={renderCO2WaveformOption(globalState.co2WaveformData.curves)}
+                    style={{height: '500px', width: '100%'}}
+                />
+                <ReactEcharts
+                    notMerge={true}
+                    ref={etco2ChartRef}
+                    option={renderETCO2WaveformOption(globalState.co2WaveformData.curves)}
+                    style={{height: '500px', width: '100%'}}
+                />
+            </Flex>
         </div>
     )
 }

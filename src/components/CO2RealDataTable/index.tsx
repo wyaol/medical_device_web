@@ -41,14 +41,14 @@ const columns: TableProps<Record<string, string>>['columns'] = [
     },
     {
         title: 'I:E',
-        dataIndex: 'dpi_info.I_per_E',
+        dataIndex: 'I_per_E',
         key: 'I_per_E',
         align: 'center',
         width: '400px',
     },
     {
         title: '状态',
-        dataIndex: 'dpi_info.status',
+        dataIndex: 'status',
         key: 'status',
         align: 'center',
         width: '400px',
@@ -62,8 +62,8 @@ const columns: TableProps<Record<string, string>>['columns'] = [
     },
 ];
 
-const renderData = (data: CO2RealData): {}[] => {
-    return [
+const renderData = (data: CO2RealData | null): {}[] => {
+    return data ? [
         {
             key: '1',
             co2_waveform: data.co2Waveform.toFixed(2),
@@ -73,6 +73,17 @@ const renderData = (data: CO2RealData): {}[] => {
             ETCO2: data.ETCO2?.toFixed(2) || '',
             RR: data.RR?.toFixed(2) || '',
             FiCO2: data.FiCO2?.toFixed(2) || '',
+        },
+    ] : [
+        {
+            key: '1',
+            co2_waveform: 0,
+            status: '',
+            I_per_E: 0,
+            interval: 0,
+            ETCO2: 0,
+            RR: 0,
+            FiCO2: 0,
         },
     ];
 };

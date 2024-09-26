@@ -69,7 +69,7 @@ const CO2DataReport = () => {
                     placeholder="请选择时间段"
                 />
                 <Button type="primary" onClick={genResult} className="generate-report-button">
-                    生成报告
+                    查看记录
                 </Button>
             </Flex>
             <div className="co2-player-container"/>

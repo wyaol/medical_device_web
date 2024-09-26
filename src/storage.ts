@@ -50,7 +50,7 @@ const storage: Storage = {
         startTime: null,
         endTime: null,
     },
-    deviceId: "5288373550535",
+    deviceId: "5288373550532",
     plusWave: {
         connect: {
             success: false,
@@ -74,9 +74,9 @@ const storage: Storage = {
     },
     co2WaveformData: {
         curves: {
-            co2Waveform: new Array(120).fill(0),
+            co2Waveform: [],
             co2WaveformTime: [],
-            etco2Waveform: new Array(len).fill(0),
+            etco2Waveform: [],
             etco2WaveformTime: []
         },
         indicators: {
