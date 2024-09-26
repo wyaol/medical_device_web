@@ -1,17 +1,4 @@
 export interface Storage {
-  dataCollectionPeriod: {
-    startTime: Date | null,
-    endTime: Date | null,
-  }
-  deviceId: string
-  plusWave: {
-    connect: {
-      success: boolean
-      message: string
-    },
-    bluetooth: Record<string, string>[],
-    data: Record<string, number[]>
-  }
     dataCollectionPeriod: {
         startTime: Date | null,
         endTime: Date | null,
