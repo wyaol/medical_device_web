@@ -7,9 +7,6 @@ WORKDIR /app
 # 复制项目文件到工作目录
 COPY . .
 
-# 设置 npm 镜像源
-#RUN npm config set registry https://npmmirror.com/mirrors/npm/
-
 # 安装依赖包
 RUN npm install
 
