@@ -105,14 +105,14 @@ const HeartRateVariabilityFrequencyDomainMetrics: (props: {
 
     const data = props.heartRateVariabilityFrequencyDomainMetrics
     const frequencyPowers = data.frequencyPowers
-    const tp = data.totalPower.toFixed(3)
+    const tp = data.totalPower?.toFixed(3)
     const vlf = frequencyPowers?.VL.toFixed(3)
     const lf = frequencyPowers?.L.toFixed(3)
     const mf = frequencyPowers?.M.toFixed(3)
     const hf = frequencyPowers?.H.toFixed(3)
     const vhf = frequencyPowers?.VH.toFixed(3)
-    const topF = data.peakFrequency.toFixed(3)
-    const topH = data.peakAmplitude.toFixed(3)
+    const topF = data.peakFrequency?.toFixed(3)
+    const topH = data.peakAmplitude?.toFixed(3)
 
     const fNormalizedPowers = data.fNormalizedPowers
     const tp_ = 1
@@ -121,7 +121,7 @@ const HeartRateVariabilityFrequencyDomainMetrics: (props: {
     const mf_ = fNormalizedPowers?.M.toFixed(3)
     const hf_ = fNormalizedPowers?.H.toFixed(3)
     const vhf_ = fNormalizedPowers?.VH.toFixed(3)
-    const l_h = data.balanceIndex.toFixed(3)
+    const l_h = data.balanceIndex?.toFixed(3)
 
     return (
         <>
