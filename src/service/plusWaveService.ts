@@ -108,3 +108,15 @@ export const getFrequencyDomainMetrics = async (periodId: number | null) => {
     balanceIndex: response['balance_index'],
   };
 }
+
+export const getHeartbeatIntervalScatterPlot = async (periodId: number | null) => {
+  if (!periodId) throw new Error('请选择时间区间');
+  const response = await request.get(`/plus_wave/data_collection_periods/${periodId}/rr_scatter`).then(res => res.data.data);
+  return {
+    x_data: response['x_data'],
+    y_data: response['y_data'],
+    symmetry_point1: response['point_1'],
+    symmetry_point2: response['point_2'],
+    angle: response['angle']
+  };
+}
