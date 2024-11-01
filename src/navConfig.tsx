@@ -7,7 +7,8 @@ import PlusWaveReport from './pages/PlusWaveReport';
 import PatientCreate from './pages/PatientCreate';
 import PatientSelect from './pages/PatientSelect';
 import CO2WaveformRealData from './pages/CO2WaveformRealData';
-import CO2DataReport from './pages/CO2DataReport';
+import CO2DataRecord from './pages/CO2DataRecord';
+import CO2WaveReport from './pages/CO2WaveReport';
 
 export interface NavItem {
     key: string;
@@ -61,7 +62,7 @@ const navConfig: NavItem[] = [
                 key: '2-2',
                 path: '/analyse-report/co2-serial',
                 name: 'CO2',
-                element: <CO2DataReport/>,
+                element: <CO2WaveReport/>,
             },
         ],
     },
@@ -92,6 +93,20 @@ const navConfig: NavItem[] = [
         icon: <SettingOutlined/>,
         element: <DeviceManagement/>,
     },
+    {
+        key: '5',
+        path: '/record-player',
+        name: '回放记录',
+        icon: <BarChartOutlined/>,
+        children: [
+            {
+                key: '5-1',
+                path: '/record-player/co2-serial',
+                name: 'CO2',
+                element: <CO2DataRecord/>,
+            },
+        ],
+    }
 ];
 
 export default navConfig;
