@@ -50,7 +50,7 @@ const storage: Storage = {
         startTime: null,
         endTime: null,
     },
-    deviceId: "5288373550532",
+    deviceId: "5288373550535",
     plusWave: {
         connect: {
             success: false,

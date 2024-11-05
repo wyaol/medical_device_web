@@ -19,7 +19,7 @@ const decompressorEvents = async (blob: Blob) => {
         return null;
     }
 }
-const CO2DataReport = () => {
+const CO2DataRecord = () => {
     const recordContainer = document.querySelector('.co2-record-container') as HTMLElement;
     const playerContainer = document.querySelector('.co2-player-container') as HTMLElement;
     const [dataCollectionPeriods, setDataCollectionPeriods] = useState([]);
@@ -77,4 +77,4 @@ const CO2DataReport = () => {
     );
 };
 
-export default CO2DataReport;
+export default CO2DataRecord;

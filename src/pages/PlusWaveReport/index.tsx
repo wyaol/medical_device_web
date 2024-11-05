@@ -14,6 +14,7 @@ import RRIntervals from '../../components/RRIntervals';
 import HeartRateVariabilityTimeDomainMetrics from '../../components/HeartRateVariabilityTimeDomainMetrics';
 import IntervalsDensity from '../../components/IntervalsDensity';
 import HeartbeatIntervalScatterPlot from '../../components/HeartbeatIntervalScatterPlot';
+import HeartbeatIntervalScatterDistributedPlot from '../../components/HeartbeatIntervalScatterDistributedPlot';
 import PSDProfile from '../../components/PSDProfile';
 import PSDHistogram from '../../components/PSDHistogram';
 import HeartRateVariabilityFrequencyDomainMetrics from '../../components/HeartRateVariabilityFrequencyDomainMetrics';
@@ -58,6 +59,9 @@ const PlusWaveReport = () => {
     symmetry_point2: [],
     angle: 0
   });
+  const [heartbeatIntervalScatterDistributedPlotData, setHeartbeatIntervalScatterDistributedPlotData] = useState<{
+    x_data: number[], y_data: number[]
+  }>({x_data: [], y_data: []});
 
   useEffect(() => {
     getAllDataCollectionPeriods()
@@ -102,6 +106,7 @@ const PlusWaveReport = () => {
 
     getHeartbeatIntervalScatterPlot(periodId).then((frequencyDomainMetrics) => {
       setHeartbeatIntervalScatterPlotData(frequencyDomainMetrics)
+      setHeartbeatIntervalScatterDistributedPlotData(frequencyDomainMetrics);
     })
 
     setPeriodIdToGenReport(periodId);
@@ -157,6 +162,9 @@ const PlusWaveReport = () => {
           </div>
           <div>
             <HeartbeatIntervalScatterPlot data={heartbeatIntervalScatterPlotData}/>
+          </div>
+          <div>
+            <HeartbeatIntervalScatterDistributedPlot data={heartbeatIntervalScatterDistributedPlotData}/>
           </div>
         </div>
 
