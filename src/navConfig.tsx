@@ -1,112 +1,62 @@
 // src/navConfig.ts
-import {LineChartOutlined, BarChartOutlined, SettingOutlined, UserOutlined} from '@ant-design/icons';
-import PlusWaveRealTimeData from "./pages/PlusWaveRealTimeData";
-import HeartRateRealTimeData from "./pages/HeartRateRealTimeData";
-import DeviceManagement from "./pages/DeviceManagement";
-import PlusWaveReport from './pages/PlusWaveReport';
-import PatientCreate from './pages/PatientCreate';
-import PatientSelect from './pages/PatientSelect';
-import CO2WaveformRealData from './pages/CO2WaveformRealData';
-import CO2DataRecord from './pages/CO2DataRecord';
-import CO2WaveReport from './pages/CO2WaveReport';
+import {BarChartOutlined, LineChartOutlined, SettingOutlined, UserOutlined} from '@ant-design/icons';
+import React from "react";
+import {Link} from "react-router-dom";
+import {MenuProps} from "antd";
 
-export interface NavItem {
-  key: string;
-  path: string;
-  name: string;
-  icon?: React.ReactNode;
-  element?: React.ReactElement;
-  children?: NavItem[];
-}
 
-const navConfig: NavItem[] = [
+type MenuItem = Required<MenuProps>['items'][number];
+
+const items: MenuItem[] = [
   {
     key: '1',
-    path: '/real-time-data',
-    name: '实时监控',
     icon: <LineChartOutlined/>,
+    label: '实时监控',
     children: [
-      {
-        key: '1-1',
-        path: '/real-time-data/plus-wave',
-        name: '脉搏波',
-        element: <PlusWaveRealTimeData/>,
-      },
-      {
-        key: '1-2',
-        path: '/real-time-data/heart-rate',
-        name: '心率',
-        element: <HeartRateRealTimeData/>,
-      },
-      {
-        key: '1-3',
-        path: '/real-time-data/co2-waveform',
-        name: 'CO2',
-        element: <CO2WaveformRealData/>,
-      }
+      {key: '1-1', label: <Link to="/real-time-data/plus-wave">脉搏波</Link>},
+      {key: '1-2', label: <Link to="/real-time-data/heart-rate">心率</Link>},
+      {key: '1-3', label: <Link to="/real-time-data/co2-waveform">CO2</Link>},
     ],
   },
   {
     key: '2',
-    path: '/analyse-report',
-    name: '分析报告',
     icon: <BarChartOutlined/>,
+    label: '分析报告',
     children: [
       {
-        key: '2-1',
-        path: '/analyse-report/plus-wave',
-        name: '脉搏波',
-        element: <PlusWaveReport/>,
+        key: '2-1', label: '脉搏波', children: [
+          {key: '2-1-1', label: <Link to="/analyse-report/plus-wave">变异率分析</Link>}
+        ]
       },
       {
-        key: '2-2',
-        path: '/analyse-report/co2-serial',
-        name: 'CO2',
-        element: <CO2WaveReport/>,
+        key: '2-2', label: 'CO2', children: [
+          {key: '2-2-1', label: <Link to="/analyse-report/co2-serial">变异率分析</Link>}
+        ]
       },
     ],
   },
   {
     key: '3',
-    path: '/record-player',
-    name: '回放记录',
     icon: <BarChartOutlined/>,
+    label: '回放记录',
     children: [
-      {
-        key: '3-1',
-        path: '/record-player/co2-serial',
-        name: 'CO2',
-        element: <CO2DataRecord/>,
-      },
-    ],
+      {key: '3-1', label: <Link to="/record-player/co2-serial">CO2记录回放</Link>}
+    ]
   },
   {
     key: '4',
-    path: '/patient-management',
-    name: '病人管理',
     icon: <UserOutlined/>,
+    label: '病人管理',
     children: [
-      {
-        key: '4-1',
-        path: '/patient-management/create',
-        name: '创建病人',
-        element: <PatientCreate/>,
-      },
-      {
-        key: '4-2',
-        path: '/patient-management/select',
-        name: '绑定病人',
-        element: <PatientSelect/>,
-      },
-    ],
+      {key: '4-1', label: <Link to="/patient-management/create">创建病人</Link>},
+      {key: '4-2', label: <Link to="/patient-management/select">选择病人</Link>}
+    ]
   },
   {
     key: '5',
-    path: '/device-management',
-    name: '设备管理',
     icon: <SettingOutlined/>,
-    element: <DeviceManagement/>,
-  },
+    label: <Link to="/device-management">设备管理</Link>
+  }
 ];
 
-export default navConfig;
+export default items;
