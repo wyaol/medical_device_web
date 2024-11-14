@@ -1,9 +1,10 @@
 import axios from "axios";
 import request from "../config/request";
-import { getCurrentPatient } from "../utils";
+import {getCurrentPatient} from "../utils";
+import {IntervalAnalyse} from "../types";
 
 export const connectPlusWaveDevice = async (deviceId: string, address: string) => {
-  const res = await request.post(`/plus_wave/devices/${deviceId}/connect`, { uuid: address });
+  const res = await request.post(`/plus_wave/devices/${deviceId}/connect`, {uuid: address});
   if (res.status !== 200) {
     throw new Error('Connection failed');
   }
@@ -119,4 +120,50 @@ export const getHeartbeatIntervalScatterPlot = async (periodId: number | null) =
     symmetry_point2: response['point_2'],
     angle: response['angle']
   };
+}
+
+export const getIntervalAnalyse = async (periodId: number | null) => {
+  if (!periodId) throw new Error('请选择时间区间');
+  let response;
+  let res: IntervalAnalyse = {
+    frequencies: [],
+    intervalScatterDistributedPlotData: {x_data: [], y_data: []},
+    intervalScatterPlotData: {angle: 0, symmetry_point1: [], symmetry_point2: [], x_data: [], y_data: []},
+    intervalsDensityData: {binCenters: [], counts: []},
+    normalizedPsd: [],
+    psdHistogramData: [],
+    rrIntervals: {rrIntervals: [], rrIntervalsAvarage: [], rrIntervalsIntervals: []}
+  }
+  response = await request.get(`/plus_wave/data_collection_periods/${periodId}/rr_scatter`).then(res => res.data.data);
+  res.intervalScatterPlotData = {
+    x_data: response['x_data'],
+    y_data: response['y_data'],
+    symmetry_point1: response['point_1'],
+    symmetry_point2: response['point_2'],
+    angle: response['angle']
+  }
+  res.intervalScatterDistributedPlotData = {
+    x_data: response['x_data'],
+    y_data: response['y_data'],
+  }
+  response = await request.get(`/plus_wave/data_collection_periods/${periodId}/psd`).then(res => res.data.data);
+  const {VL, L, M, H, VH} = response['histogram']
+  res.frequencies = response['profile']['frequencies'];
+  res.normalizedPsd = response['profile']['normalized_psd'];
+  res.psdHistogramData = [VL, L, M, H, VH];
+  response = await request.get(`/plus_wave/data_collection_periods/${periodId}/rr_intervals`).then(res => res.data.data);
+  res = {
+    ...res,
+    rrIntervals: {
+      rrIntervals: response['rr_intervals'],
+      rrIntervalsAvarage: response['rr_intervals_average'],
+      rrIntervalsIntervals: response['rr_intervals_intervals'],
+    },
+    intervalsDensityData: {
+      binCenters: response['intervals_density']['bin_centers'],
+      counts: response['intervals_density']['counts'],
+    },
+  };
+
+  return res;
 }

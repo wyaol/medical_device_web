@@ -4,7 +4,7 @@ import React from "react";
 
 const renderOption = (data: any) => ({
   title: {
-    text: '心率变异谱密度分布图  '
+    text: '变异谱密度分布图  '
   },
   xAxis: {
     type: 'value',
