@@ -1,24 +1,34 @@
 import {Button, message, Select} from 'antd';
-import React, {useEffect, useState, useCallback} from 'react';
-import {
-  getAllDataCollectionPeriods,
-  getIntervals,
-} from '../../service/co2DataService';
+import React, {useCallback, useEffect, useState} from 'react';
+import {getAllDataCollectionPeriods,} from '../../service/co2DataService';
 import './index.css';
+import IntervalAnalyseComponent from "../../components/IntervalsAnalyseComponent";
+import {IntervalAnalyse} from "../../types";
+import {getIntervalAnalyseByType} from "../../service/intervalAnalyseService";
+
+
+const INTERVAL_TYPE = [
+  {
+    label: '呼吸',
+    value: 'co2_breath'
+  },
+  {
+    label: '吸',
+    value: 'co2_inspiratory'
+  },
+  {
+    label: '呼',
+    value: 'co2_expiratory'
+  }
+]
+
 
 const CO2WaveReport = () => {
   const [dataCollectionPeriods, setDataCollectionPeriods] = useState([]);
   const [periodId, setPeriodId] = useState<number | null>(null);
+  const [intervalType, setIntervalType] = useState<string>(INTERVAL_TYPE[0].value);
   const [periodIdToGenReport, setPeriodIdToGenReport] = useState<number | null>(null);
-  const [intervals, setIntervals] = useState<{
-    breathIntervals: number[],
-    inspiratoryIntervals: number[],
-    expiratoryIntervals: number[]
-  }>({
-    breathIntervals: [],
-    inspiratoryIntervals: [],
-    expiratoryIntervals: []
-  });
+  const [intervalAnalyse, setIntervalAnalyse] = useState<IntervalAnalyse | null>(null);
   useEffect(() => {
     getAllDataCollectionPeriods()
       .then(periods => {
@@ -35,16 +45,12 @@ const CO2WaveReport = () => {
       return;
     }
 
-    getIntervals(periodId)
-      .then(intervals => {
-        setIntervals(intervals);
-      })
-      .catch((error: Error) => {
-        message.error('生成报告失败: ' + error.message);
-      });
-
     setPeriodIdToGenReport(periodId);
-  }, [periodId]);
+
+    getIntervalAnalyseByType(periodId, intervalType).then((res) => {
+      setIntervalAnalyse(res);
+    });
+  }, [periodId, intervalType]);
 
   return (
     <div className="plus-wave-report-container">
@@ -60,52 +66,25 @@ const CO2WaveReport = () => {
           placeholder="请选择时间段"
         />
       </div>
+      <div className="select-container">
+        <label>选择分析类型: </label>
+        <Select
+          className="select-dropdown"
+          onChange={(value) => setIntervalType(value)}
+          options={INTERVAL_TYPE.map(item => ({
+            value: item.value,
+            label: item.label
+          }))}
+          placeholder="选择分析类型"
+        />
+      </div>
       <Button type="primary" onClick={genReport} className="generate-report-button">
         生成报告
       </Button>
       {periodIdToGenReport && <div>
-        <div className="report-box">
-          <div className="report-title">呼吸间隔</div>
-          <div className="report-results">
-            {intervals.breathIntervals.length > 0 ? (
-              intervals.breathIntervals.slice(0, 500).map((breathIntervals, index) => (
-                <div key={index} className="interval-item">
-                  {breathIntervals}
-                </div>
-              ))
-            ) : (
-              <div className="no-data">暂无数据</div>
-            )}
-          </div>
-        </div>
-        <div className="report-box">
-          <div className="report-title">吸气间隔</div>
-          <div className="report-results">
-            {intervals.inspiratoryIntervals.length > 0 ? (
-              intervals.inspiratoryIntervals.slice(0, 500).map((breathIntervals, index) => (
-                <div key={index} className="interval-item">
-                  {breathIntervals}
-                </div>
-              ))
-            ) : (
-              <div className="no-data">暂无数据</div>
-            )}
-          </div>
-        </div>
-        <div className="report-box">
-          <div className="report-title">呼气间隔</div>
-          <div className="report-results">
-            {intervals.expiratoryIntervals.length > 0 ? (
-              intervals.expiratoryIntervals.slice(0, 500).map((breathIntervals, index) => (
-                <div key={index} className="interval-item">
-                  {breathIntervals}
-                </div>
-              ))
-            ) : (
-              <div className="no-data">暂无数据</div>
-            )}
-          </div>
-        </div>
+
+        {intervalAnalyse && <IntervalAnalyseComponent intervalAnalyse={intervalAnalyse}/>}
+
       </div>}
     </div>
   );

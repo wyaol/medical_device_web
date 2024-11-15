@@ -13,7 +13,7 @@ const renderOption = (title: string, data: any, maxValue: number, minValue: numb
     type: 'value',
     max: maxValue,
     min: minValue,
-    interval: 200
+    interval: (maxValue - minValue) / 5
   },
   series: [
     {

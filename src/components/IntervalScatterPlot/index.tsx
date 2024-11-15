@@ -3,15 +3,19 @@ import ReactEcharts from "echarts-for-react";
 
 const renderOption = (lorenzHeartRateData: {
   x_data: number[],
-  y_data: number[]
+  y_data: number[],
+  symmetry_point1: number[],
+  symmetry_point2: number[],
+  angle: number
 }) => {
   const x_data = lorenzHeartRateData.x_data
   const y_data = lorenzHeartRateData.y_data
   const centerX = x_data.reduce((accumulator, currentValue) => accumulator + currentValue, 0) / x_data.length;
   const centerY = y_data.reduce((accumulator, currentValue) => accumulator + currentValue, 0) / y_data.length;
+  const angle = `${lorenzHeartRateData.angle.toFixed(2)}°`;
   return {
     title: {
-      text: '心跳间期散点分布图',
+      text: '彗星散点图',
       left: 'center'
     },
     xAxis: {
@@ -20,27 +24,46 @@ const renderOption = (lorenzHeartRateData: {
     yAxis: {
       name: 'RR_n+1',
     },
+    graphic: {
+      elements: [
+        {
+          type: 'text',
+          left: '90%', // 文本的左边缘位置
+          top: '5%', // 文本的顶边缘位置
+          style: {
+            text: angle, // 文本内容
+            fill: '#ff0000', // 文本颜色
+            fontSize: 15, // 字体大小
+            textAlign: 'left', // 文本对齐方式
+            textBaseline: 'middle', // 垂直对齐方式
+          },
+        },
+      ],
+    },
     series: [
       {
         data: x_data.map((_, index) => [x_data[index], y_data[index]]),
         type: 'scatter',
       },
       {
-        data: [[0, centerY], [1200, centerY]],
+        // 45°对称轴
+        data: [[0, 0], [1200, 1200]],
         type: 'line',
         lineStyle: {
           type: 'dashed',
           color: 'green',
           zlevel: 1,
+          width: 5
         }
       },
       {
-        data: [[centerX, 0], [centerX, 1200]],
+        // 对称轴
+        data: [lorenzHeartRateData.symmetry_point1, lorenzHeartRateData.symmetry_point2],
         type: 'line',
         lineStyle: {
           type: 'dashed',
-          color: 'green',
-          zlevel: 1,
+          color: 'red',
+          zlevel: 2
         }
       },
       {
@@ -56,10 +79,10 @@ const renderOption = (lorenzHeartRateData: {
   }
 }
 
-const HeartbeatIntervalScatterDistributedPlot: React.FC<{
-  data: { x_data: number[], y_data: number[]},
+const IntervalScatterPlot: React.FC<{
+  data: { x_data: number[], y_data: number[], symmetry_point1: number[], symmetry_point2: number[], angle: number },
 }> = (props: {
-  data: { x_data: number[], y_data: number[]},
+  data: { x_data: number[], y_data: number[], symmetry_point1: number[], symmetry_point2: number[], angle: number },
 }) => {
 
   return <div>
@@ -71,4 +94,4 @@ const HeartbeatIntervalScatterDistributedPlot: React.FC<{
   </div>
 }
 
-export default HeartbeatIntervalScatterDistributedPlot
+export default IntervalScatterPlot

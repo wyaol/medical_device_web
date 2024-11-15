@@ -3,7 +3,7 @@ import React from "react";
 
 const renderOption = (binCenters: number[], probabilities: number[]) => ({
   title: {
-    text: '心跳间期概率分布图',
+    text: '概率分布图',
     left: 'center'
   },
   tooltip: {
@@ -17,7 +17,7 @@ const renderOption = (binCenters: number[], probabilities: number[]) => ({
     // max: 1.4,
     type: 'category',
     data: binCenters.map((item: number) => item.toFixed(2)),
-    name: '心跳间期 (秒)',
+    name: '间期 (秒)',
     nameLocation: 'middle',
     nameTextStyle: {
       fontWeight: 'bold',
