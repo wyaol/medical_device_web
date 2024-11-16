@@ -18,9 +18,11 @@ const renderOption = (lorenzHeartRateData: {
     },
     xAxis: {
       name: 'RR_n',
+      max: board,
     },
     yAxis: {
       name: 'RR_n+1',
+      max: board,
     },
     series: [
       {
