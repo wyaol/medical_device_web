@@ -6,13 +6,15 @@ const renderOption = (lorenzHeartRateData: {
   y_data: number[],
   symmetry_point1: number[],
   symmetry_point2: number[],
-  angle: number
+  angle: number,
+  board: number
 }) => {
   const x_data = lorenzHeartRateData.x_data
   const y_data = lorenzHeartRateData.y_data
   const centerX = x_data.reduce((accumulator, currentValue) => accumulator + currentValue, 0) / x_data.length;
   const centerY = y_data.reduce((accumulator, currentValue) => accumulator + currentValue, 0) / y_data.length;
   const angle = `${lorenzHeartRateData.angle.toFixed(2)}°`;
+  const board = lorenzHeartRateData.board
   return {
     title: {
       text: '彗星散点图',
@@ -47,7 +49,7 @@ const renderOption = (lorenzHeartRateData: {
       },
       {
         // 45°对称轴
-        data: [[0, 0], [1200, 1200]],
+        data: [[0, 0], [board, board]],
         type: 'line',
         lineStyle: {
           type: 'dashed',
@@ -80,9 +82,9 @@ const renderOption = (lorenzHeartRateData: {
 }
 
 const IntervalScatterPlot: React.FC<{
-  data: { x_data: number[], y_data: number[], symmetry_point1: number[], symmetry_point2: number[], angle: number },
+  data: { x_data: number[], y_data: number[], symmetry_point1: number[], symmetry_point2: number[], angle: number, board: number },
 }> = (props: {
-  data: { x_data: number[], y_data: number[], symmetry_point1: number[], symmetry_point2: number[], angle: number },
+  data: { x_data: number[], y_data: number[], symmetry_point1: number[], symmetry_point2: number[], angle: number, board: number },
 }) => {
 
   return <div>

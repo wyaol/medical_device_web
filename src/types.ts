@@ -13,11 +13,13 @@ type IntervalAnalyse = {
     y_data: number[],
     symmetry_point1: number[],
     symmetry_point2: number[],
-    angle: number
+    angle: number,
+    board: number
   },
   intervalScatterDistributedPlotData: {
     x_data: number[],
-    y_data: number[]
+    y_data: number[],
+    board: number
   },
   frequencies: number[],
   normalizedPsd: number[],

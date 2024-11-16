@@ -5,8 +5,8 @@ export const getIntervalAnalyseByType = async (periodId: number | null, interval
   if (!periodId) throw new Error('请选择时间区间');
   let res: IntervalAnalyse = {
     frequencies: [],
-    intervalScatterDistributedPlotData: {x_data: [], y_data: []},
-    intervalScatterPlotData: {angle: 0, symmetry_point1: [], symmetry_point2: [], x_data: [], y_data: []},
+    intervalScatterDistributedPlotData: {x_data: [], y_data: [], board: 0},
+    intervalScatterPlotData: {angle: 0, symmetry_point1: [], symmetry_point2: [], x_data: [], y_data: [], board: 0},
     intervalsDensityData: {binCenters: [], counts: []},
     normalizedPsd: [],
     psdHistogramData: [],
@@ -20,7 +20,8 @@ export const getIntervalAnalyseByType = async (periodId: number | null, interval
     y_data: response['interval_scatter_plot_data']['y_data'],
     symmetry_point1: response['interval_scatter_plot_data']['point_1'],
     symmetry_point2: response['interval_scatter_plot_data']['point_2'],
-    angle: response['interval_scatter_plot_data']['angle']
+    angle: response['interval_scatter_plot_data']['angle'],
+    board: response['interval_scatter_plot_data']['board']
   }
   res.intervalScatterDistributedPlotData = response['interval_scatter_distributed_plot_data']
   const {VL, L, M, H, VH} = response['psd_histogram_data']
