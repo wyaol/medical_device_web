@@ -91,8 +91,8 @@ const renderData = (avg: number, sd: number, cv: number, max: number, min: numbe
   return [
     {
       key: '1',
-      avg: avg, sd: sd, cv: cv, max: max, min: min, ld: ld, fm: fm, pm: pm,
-      dm: dm, sc: sc, ic: ic, ac: ac, xgd: xgd, ygd: ygd, mrd: mrd, syd: syd
+      avg: avg.toFixed(3), sd: sd.toFixed(3), cv: cv.toFixed(3), max: max.toFixed(3), min: min.toFixed(3), ld: ld.toFixed(3), fm: fm.toFixed(3), pm: pm.toFixed(3),
+      dm: dm.toFixed(3), sc: sc.toFixed(3), ic: ic.toFixed(3), ac: ac.toFixed(3), xgd: xgd.toFixed(3), ygd: ygd.toFixed(3), mrd: mrd.toFixed(3), syd: syd.toFixed(3)
     },
   ]
 }
