@@ -7,6 +7,7 @@ import PatientSelect from './pages/PatientSelect';
 import CO2WaveformRealData from './pages/CO2WaveformRealData';
 import CO2DataRecord from './pages/CO2DataRecord';
 import CO2WaveReport from './pages/CO2WaveReport';
+import BrainWavesRealTimeData from './pages/BrainWavesRealTimeData'
 
 
 const routeConfig = [
@@ -21,6 +22,10 @@ const routeConfig = [
   {
     path: '/real-time-data/co2-waveform',
     element: <CO2WaveformRealData />,
+  },
+  {
+    path: '/real-time-data/brain-waves',
+    element: <BrainWavesRealTimeData />,
   },
   {
     path: '/analyse-report/plus-wave',

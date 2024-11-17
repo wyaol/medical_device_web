@@ -16,6 +16,7 @@ const items: MenuItem[] = [
       {key: '1-1', label: <Link to="/real-time-data/plus-wave">脉搏波</Link>},
       {key: '1-2', label: <Link to="/real-time-data/heart-rate">心率</Link>},
       {key: '1-3', label: <Link to="/real-time-data/co2-waveform">CO2</Link>},
+      {key: '1-4', label: <Link to="/real-time-data/brain-waves">脑电波</Link>},
     ],
   },
   {
