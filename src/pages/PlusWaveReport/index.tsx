@@ -17,8 +17,8 @@ const PlusWaveReport = () => {
   const [dataCollectionPeriods, setDataCollectionPeriods] = useState([]);
   const [intervalAnalyse, setIntervalAnalyse] = useState<IntervalAnalyse>({
     frequencies: [],
-    intervalScatterDistributedPlotData: {x_data: [], y_data: []},
-    intervalScatterPlotData: {angle: 0, symmetry_point1: [], symmetry_point2: [], x_data: [], y_data: []},
+    intervalScatterDistributedPlotData: {x_data: [], y_data: [], board: 0},
+    intervalScatterPlotData: {angle: 0, symmetry_point1: [], symmetry_point2: [], x_data: [], y_data: [], board: 0},
     intervalsDensityData: {binCenters: [], counts: []},
     normalizedPsd: [],
     psdHistogramData: [],

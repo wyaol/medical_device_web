@@ -127,8 +127,8 @@ export const getIntervalAnalyse = async (periodId: number | null) => {
   let response;
   let res: IntervalAnalyse = {
     frequencies: [],
-    intervalScatterDistributedPlotData: {x_data: [], y_data: []},
-    intervalScatterPlotData: {angle: 0, symmetry_point1: [], symmetry_point2: [], x_data: [], y_data: []},
+    intervalScatterDistributedPlotData: {x_data: [], y_data: [], board: 0},
+    intervalScatterPlotData: {angle: 0, symmetry_point1: [], symmetry_point2: [], x_data: [], y_data: [], board: 0},
     intervalsDensityData: {binCenters: [], counts: []},
     normalizedPsd: [],
     psdHistogramData: [],
@@ -140,11 +140,13 @@ export const getIntervalAnalyse = async (periodId: number | null) => {
     y_data: response['y_data'],
     symmetry_point1: response['point_1'],
     symmetry_point2: response['point_2'],
-    angle: response['angle']
+    angle: response['angle'],
+    board: response['board']
   }
   res.intervalScatterDistributedPlotData = {
     x_data: response['x_data'],
     y_data: response['y_data'],
+    board: response['board']
   }
   response = await request.get(`/plus_wave/data_collection_periods/${periodId}/psd`).then(res => res.data.data);
   const {VL, L, M, H, VH} = response['histogram']

@@ -3,12 +3,14 @@ import ReactEcharts from "echarts-for-react";
 
 const renderOption = (lorenzHeartRateData: {
   x_data: number[],
-  y_data: number[]
+  y_data: number[],
+  board: number
 }) => {
   const x_data = lorenzHeartRateData.x_data
   const y_data = lorenzHeartRateData.y_data
   const centerX = x_data.reduce((accumulator, currentValue) => accumulator + currentValue, 0) / x_data.length;
   const centerY = y_data.reduce((accumulator, currentValue) => accumulator + currentValue, 0) / y_data.length;
+  const board = lorenzHeartRateData.board
   return {
     title: {
       text: '散点分布图',
@@ -16,9 +18,11 @@ const renderOption = (lorenzHeartRateData: {
     },
     xAxis: {
       name: 'RR_n',
+      max: board,
     },
     yAxis: {
       name: 'RR_n+1',
+      max: board,
     },
     series: [
       {
@@ -26,7 +30,7 @@ const renderOption = (lorenzHeartRateData: {
         type: 'scatter',
       },
       {
-        data: [[0, centerY], [1200, centerY]],
+        data: [[0, centerY], [board, centerY]],
         type: 'line',
         lineStyle: {
           type: 'dashed',
@@ -35,7 +39,7 @@ const renderOption = (lorenzHeartRateData: {
         }
       },
       {
-        data: [[centerX, 0], [centerX, 1200]],
+        data: [[centerX, 0], [centerX, board]],
         type: 'line',
         lineStyle: {
           type: 'dashed',
@@ -57,9 +61,9 @@ const renderOption = (lorenzHeartRateData: {
 }
 
 const HeartbeatIntervalScatterDistributedPlot: React.FC<{
-  data: { x_data: number[], y_data: number[]},
+  data: { x_data: number[], y_data: number[], board: number },
 }> = (props: {
-  data: { x_data: number[], y_data: number[]},
+  data: { x_data: number[], y_data: number[], board: number },
 }) => {
 
   return <div>
