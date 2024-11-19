@@ -3,7 +3,7 @@ name: medical_device_web 项目文件对应 CI/CD 工作流
 on:
   push:
     branches:
-      - 'master'
+      - '*'
 
 jobs:
   build-and-deploy:
@@ -14,7 +14,7 @@ jobs:
       SERVER_IP: 110.41.165.162
       SERVER_PORT: 2022
       PROJECT_PATH: /root/medical_device/medical_device_web
-      NGINX_CONF_PATH: /etc/nginx/sites-available/default
+      NGINX_CONF_PATH: /etc/nginx/nginx.conf
 
     steps:
       - name: 检查代码库
