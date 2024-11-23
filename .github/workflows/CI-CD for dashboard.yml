@@ -51,4 +51,4 @@ jobs:
 
       - name: 更新 Nginx 配置
         run: |
-          sshpass -p "${{ env.SSH_PASSWORD }}" ssh -o ConnectTimeout=10 -o StrictHostKeyChecking=no -p ${{ env.SERVER_PORT }} ${SSH_USERNAME}@${{ env.SERVER_IP }} "sed -i 's#/var/www/html#${{ env.PROJECT_PATH }}#' ${{ env.NGINX_CONF_PATH }} && service nginx reload"
+          sshpass -p "${{ env.SSH_PASSWORD }}" ssh -o ConnectTimeout=10 -o StrictHostKeyChecking=no -p ${{ env.SERVER_PORT }} root@${{ env.SERVER_IP }} "sed -i 's#/var/www/html#${{ env.PROJECT_PATH }}#' ${{ env.NGINX_CONF_PATH }} && service nginx reload"
