@@ -1,4 +1,4 @@
-name: medical_device_web 项目文件对应 CI/CD 工作流
+name: medical_device_web 项目文件对应的 CI/CD 工作流
 
 on:
   push:
@@ -28,7 +28,7 @@ jobs:
       - name: 安装所需依赖
         run: npm ci
 
-      - name: 搭建项目
+      - name: 搭建项目(临时CI=false)
         run: CI=false npm run build
 
       - name: 安装 rsync,sshpass
