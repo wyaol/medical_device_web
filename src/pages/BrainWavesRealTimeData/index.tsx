@@ -49,42 +49,42 @@ const renderEEGParamsOption = (data: any, len: number) => ({
   series: [
     {
       name: 'qCON（镇静指数）',
-      data: data['blood_pressure_diastolic'],
+      data: data['qCON'],
       type: 'line',
       smooth: true,
       showSymbol: false,
     },
     {
       name: 'qNOX（伤害刺激指数）',
-      data: data['blood_pressure_systolic'],
+      data: data['qNOX'],
       type: 'line',
       smooth: true,
       showSymbol: false,
     },
     {
       name: 'BS（爆发抑制比）',
-      data: data['heart_rate'],
+      data: data['BS'],
       type: 'line',
       smooth: true,
       showSymbol: false,
     },
     {
       name: 'EMG（肌电指数）',
-      data: data['microcirculation'],
+      data: data['EMG'],
       type: 'line',
       smooth: true,
       showSymbol: false,
     },
     {
       name: 'SQI（信号质量）',
-      data: data['oxygen_saturation'],
+      data: data['SQI'],
       type: 'line',
       smooth: true,
       showSymbol: false,
     },
     {
       name: 'FREQ（EEG 频率）',
-      data: data['oxygen_saturation'],
+      data: data['FREQ'],
       type: 'line',
       smooth: true,
       showSymbol: false,
@@ -125,28 +125,28 @@ const renderPPGParamsOption = (data: any, len: number) => ({
   series: [
     {
       name: 'SpO2（血氧饱和度）',
-      data: data['blood_pressure_diastolic'],
+      data: data['SpO2'],
       type: 'line',
       smooth: true,
       showSymbol: false,
     },
     {
       name: 'PR（脉率）',
-      data: data['blood_pressure_systolic'],
+      data: data['PR'],
       type: 'line',
       smooth: true,
       showSymbol: false,
     },
     {
       name: 'PI（灌注指数）',
-      data: data['heart_rate'],
+      data: data['PI'],
       type: 'line',
       smooth: true,
       showSymbol: false,
     },
     {
       name: 'RR（呼吸频率）',
-      data: data['microcirculation'],
+      data: data['RR'],
       type: 'line',
       smooth: true,
       showSymbol: false,
@@ -194,7 +194,7 @@ const renderWavesOption = (data: any, len: number, name: string) => ({
   series: [
     {
       name: name,
-      data: data.eegWaves,
+      data: data,
       type: 'line',
       showSymbol: false,
       smooth: true,
@@ -233,30 +233,30 @@ const BrainWavesRealTimeData = () => {
 
   useEffect(() => {
     // @ts-ignore
-    eegParamsChartRef?.current?.getEchartsInstance().setOption(renderEEGParamsOption(globalState.plusWave.data, len));
-  }, [globalState.plusWave.data])
+    eegParamsChartRef?.current?.getEchartsInstance().setOption(renderEEGParamsOption(globalState.BrainWaves.eegParamsData, len));
+  }, [globalState.BrainWaves.eegParamsData])
   useEffect(() => {
     // @ts-ignore
-    eegLeftWavesChartRef?.current?.getEchartsInstance().setOption(renderWavesOption(globalState.plusWave.data));
-  }, [globalState.plusWave.data])
+    eegLeftWavesChartRef?.current?.getEchartsInstance().setOption(renderWavesOption(globalState.BrainWaves.eegLeftWavesData));
+  }, [globalState.BrainWaves.eegLeftWavesData])
   useEffect(() => {
     // @ts-ignore
-    eegRightWavesChartRef?.current?.getEchartsInstance().setOption(renderWavesOption(globalState.plusWave.data));
-  }, [globalState.plusWave.data])
+    eegRightWavesChartRef?.current?.getEchartsInstance().setOption(renderWavesOption(globalState.BrainWaves.eegRightWavesData));
+  }, [globalState.BrainWaves.eegRightWavesData])
   useEffect(() => {
     // @ts-ignore
-    ppgParamsChartRef?.current?.getEchartsInstance().setOption(renderPPGParamsOption(globalState.plusWave.data, len));
-  }, [globalState.plusWave.data])
+    ppgParamsChartRef?.current?.getEchartsInstance().setOption(renderPPGParamsOption(globalState.BrainWaves.ppgParamsData, len));
+  }, [globalState.BrainWaves.ppgParamsData])
 
   useEffect(() => {
     // @ts-ignore
-    ppgLeftWavesChartRef?.current?.getEchartsInstance().setOption(renderWavesOption(globalState.plusWave.data));
-  }, [globalState.plusWave.data]);
+    ppgLeftWavesChartRef?.current?.getEchartsInstance().setOption(renderWavesOption(globalState.BrainWaves.ppgLeftWavesData));
+  }, [globalState.BrainWaves.ppgLeftWavesData]);
 
   useEffect(() => {
     // @ts-ignore
-    ppgRightWavesChartRef?.current?.getEchartsInstance().setOption(renderWavesOption(globalState.plusWave.data));
-  }, [globalState.plusWave.data]);
+    ppgRightWavesChartRef?.current?.getEchartsInstance().setOption(renderWavesOption(globalState.BrainWaves.ppgRightWavesData));
+  }, [globalState.BrainWaves.ppgRightWavesData]);
 
   return (<div>
 
@@ -264,7 +264,7 @@ const BrainWavesRealTimeData = () => {
       <ReactEcharts
         notMerge={true}
         ref={eegParamsChartRef}
-        option={renderEEGParamsOption(globalState.plusWave.data, 20)}
+        option={renderEEGParamsOption(globalState.BrainWaves.eegParamsData, 20)}
         style={{height: '440px', width: '40%'}}
       />
 
@@ -272,13 +272,13 @@ const BrainWavesRealTimeData = () => {
         <ReactEcharts
           notMerge={true}
           ref={eegLeftWavesChartRef}
-          option={renderWavesOption(globalState.plusWave.data, 400, 'EEG waves - left')}
+          option={renderWavesOption(globalState.BrainWaves.eegLeftWavesData, 1024, 'EEG waves - left')}
           style={{height: '220px', width: '100%'}}
         />
         <ReactEcharts
           notMerge={true}
           ref={eegRightWavesChartRef}
-          option={renderWavesOption(globalState.plusWave.data, 400, 'EEG waves - right')}
+          option={renderWavesOption(globalState.BrainWaves.eegRightWavesData, 1024, 'EEG waves - right')}
           style={{height: '220px', width: '100%'}}
         />
       </Flex>
@@ -287,7 +287,7 @@ const BrainWavesRealTimeData = () => {
       <ReactEcharts
         notMerge={true}
         ref={ppgParamsChartRef}
-        option={renderPPGParamsOption(globalState.plusWave.data, 20)}
+        option={renderPPGParamsOption(globalState.BrainWaves.ppgParamsData, 20)}
         style={{height: '440px', width: '40%'}}
       />
 
@@ -295,13 +295,13 @@ const BrainWavesRealTimeData = () => {
         <ReactEcharts
           notMerge={true}
           ref={ppgLeftWavesChartRef}
-          option={renderWavesOption(globalState.plusWave.data, 400, 'PPG waves - left')}
+          option={renderWavesOption(globalState.BrainWaves.ppgLeftWavesData, 1024, 'PPG waves - left')}
           style={{height: '220px', width: '100%'}}
         />
         <ReactEcharts
           notMerge={true}
           ref={ppgRightWavesChartRef}
-          option={renderWavesOption(globalState.plusWave.data, 400, 'PPG waves - right')}
+          option={renderWavesOption(globalState.BrainWaves.ppgRightWavesData, 1024, 'PPG waves - right')}
           style={{height: '220px', width: '100%'}}
         />
       </Flex>
