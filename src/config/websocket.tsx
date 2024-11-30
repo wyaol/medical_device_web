@@ -114,89 +114,115 @@ const WebSocketComponent = () => {
             }));
           }
           break;
+        case 'brain_waves_devices_list':
+          setGlobalState((prevState: Storage) => ({
+            ...prevState,
+            BrainWavesDevice: {
+              ...prevState.BrainWavesDevice,
+              devices: data.data
+            }
+          }));
+          break;
+        case 'brain_waves_devices_connect':
+          setGlobalState((prevState: Storage) => ({
+            ...prevState,
+            BrainWavesDevice: {
+              ...prevState.BrainWavesDevice,
+              connect: data.data
+            }
+          }));
+          break;
         case 'transfer_brain_waves_data':
           const brainWavesPackageInfo = data.data;
           const type = brainWavesPackageInfo.type;
           delete brainWavesPackageInfo['type'];
           switch (type) {
             case 1:
-              const eegParamsData = globalState.BrainWaves.eegParamsData;
+              if (brainWavesPackageInfo.position === 0) {
+                let eegParamsData = globalState.brainWavesData.eegLeftParamsData;
 
-              Object.keys(eegParamsData).forEach((key: string) => {
-                eegParamsData[key] = [...eegParamsData[key].slice(1), brainWavesPackageInfo[key]];
-              })
+                Object.keys(eegParamsData).forEach((key: string) => {
+                  eegParamsData[key] = [...eegParamsData[key].slice(1), brainWavesPackageInfo[key]];
+                })
 
-              setGlobalState((prevState: Storage) => ({
-                ...prevState,
-                BrainWaves: {
-                  ...prevState.BrainWaves,
-                  eegParamsData: eegParamsData
-                }
-              }));
+                setGlobalState((prevState: Storage) => ({
+                  ...prevState,
+                  brainWavesData: {
+                    ...prevState.brainWavesData,
+                    eegLeftParamsData: eegParamsData
+                  }
+                }));
+              } else {
+                let eegParamsData = globalState.brainWavesData.eegRightParamsData;
+
+                Object.keys(eegParamsData).forEach((key: string) => {
+                  eegParamsData[key] = [...eegParamsData[key].slice(1), brainWavesPackageInfo[key]];
+                })
+
+                setGlobalState((prevState: Storage) => ({
+                  ...prevState,
+                  brainWavesData: {
+                    ...prevState.brainWavesData,
+                    eegRightParamsData: eegParamsData
+                  }
+                }));
+              }
               break;
             case 2:
-              const ppgParamsData = globalState.BrainWaves.ppgParamsData;
+              const ppgParamsData = globalState.brainWavesData.ppgParamsData;
               Object.keys(ppgParamsData).forEach((key: string) => {
                 ppgParamsData[key] = [...ppgParamsData[key].slice(1), brainWavesPackageInfo[key]];
               })
               setGlobalState((prevState: Storage) => ({
                 ...prevState,
-                BrainWaves: {
-                  ...prevState.BrainWaves,
-                  eegParamsData: ppgParamsData
+                brainWavesData: {
+                  ...prevState.brainWavesData,
+                  eegLeftParamsData: ppgParamsData
                 }
               }));
               break;
             case 3:
               if (brainWavesPackageInfo.position === 0) {
-                let eegWavesData = globalState.BrainWaves.eegLeftWavesData;
-                const eegWaves = brainWavesPackageInfo['waves'];
-                eegWavesData = [...eegWavesData.slice(eegWavesData.length - eegWaves.length,eegWavesData.length), ...eegWaves];
                 setGlobalState((prevState: Storage) => ({
                   ...prevState,
-                  BrainWaves: {
-                    ...prevState.BrainWaves,
-                    eegLeftWavesData: eegWavesData
+                  brainWavesData: {
+                    ...prevState.brainWavesData,
+                    eegLeftWavesData: brainWavesPackageInfo['waves']
                   }
                 }));
               } else {
-                let eegWavesData = globalState.BrainWaves.eegRightWavesData;
-                const eegWaves = brainWavesPackageInfo['waves'];
-                eegWavesData = [...eegWavesData.slice(eegWavesData.length - eegWaves.length,eegWavesData.length), ...eegWaves];
                 setGlobalState((prevState: Storage) => ({
                   ...prevState,
-                  BrainWaves: {
-                    ...prevState.BrainWaves,
-                    eegRightWavesData: eegWavesData
+                  brainWavesData: {
+                    ...prevState.brainWavesData,
+                    eegRightWavesData: brainWavesPackageInfo['waves']
                   }
                 }));
               }
 
               break;
             case 4:
-              if (brainWavesPackageInfo.position === 0) {
-                let ppgWavesData = globalState.BrainWaves.ppgLeftWavesData;
-                const ppgWaves = brainWavesPackageInfo['waves'];
-                ppgWavesData = [...ppgWavesData.slice(ppgWavesData.length - ppgWaves.length,ppgWavesData.length), ...ppgWaves];
-                setGlobalState((prevState: Storage) => ({
-                  ...prevState,
-                  BrainWaves: {
-                    ...prevState.BrainWaves,
-                    ppgLeftWavesData: ppgWavesData
-                  }
-                }))
-              } else {
-                let ppgWavesData = globalState.BrainWaves.ppgRightWavesData;
-                const ppgWaves = brainWavesPackageInfo['waves'];
-                ppgWavesData = [...ppgWavesData.slice(ppgWavesData.length - ppgWaves.length,ppgWavesData.length), ...ppgWaves];
-                setGlobalState((prevState: Storage) => ({
-                  ...prevState,
-                  BrainWaves: {
-                    ...prevState.BrainWaves,
-                    ppgRightWavesData: ppgWavesData
-                  }
-                }))
-              }
+              setGlobalState((prevState: Storage) => ({
+                ...prevState,
+                brainWavesData: {
+                  ...prevState.brainWavesData,
+                  ppgWavesData: brainWavesPackageInfo['waves']
+                }
+              }))
+              break;
+            case 5:
+              const eventMarkData = globalState.brainWavesData.eventMarkData;
+
+              Object.keys(eventMarkData).forEach((key: string) => {
+                eventMarkData[key] = brainWavesPackageInfo[key];
+              })
+              setGlobalState((prevState: Storage) => ({
+                ...prevState,
+                brainWavesData: {
+                  ...prevState.brainWavesData,
+                  eventMarkData: eventMarkData
+                }
+              }));
               break;
             default:
               console.log('Unknown package type', brainWavesPackageInfo.type);

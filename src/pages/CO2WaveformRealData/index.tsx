@@ -1,14 +1,12 @@
 import React, {useEffect, useRef, useState} from 'react';
 import {AxiosResponse} from 'axios';
 import {useGlobalState} from '../../config/GlobalStateContext';
-import {getCO2RecordMinioObjectName} from "../../utils";
+import {getRecordMinioObjectName,startRecord,compressEvents} from "../../utils";
 import {putObjectByPresignedUrl} from '../../service/objectStoreService'
 import ReactEcharts from "echarts-for-react";
 import {Button, message, Modal, List, Alert, Flex} from "antd";
 import storage from '../../storage';
 import CO2RealDataTable from '../../components/CO2RealDataTable';
-import * as rrweb from 'rrweb';
-import Gzip from 'gzip-js';
 import {
     scanCO2SerialDevice,
     connectCO2SerialDevice,
@@ -102,62 +100,6 @@ const renderETCO2WaveformOption = (data: {
     },
 })
 
-
-const compressEvents = (events: any[]): Blob | null => {
-    try {
-        const eventsJson = JSON.stringify(events);
-        const encodedData = new TextEncoder().encode(eventsJson);
-        const compressedData = new Uint8Array(Gzip.zip(encodedData));
-        return new Blob([compressedData], {type: 'application/octet-stream'});
-    } catch (error) {
-        console.error('Error compressing events:', error);
-        return null;
-    }
-}
-const startRecord = (events: any[]) => {
-    return rrweb.record({
-        emit: (event) => {
-            events.push(event)
-        },
-        // 对 canvas 进行录制
-        recordCanvas: true,
-        // 配置抽样策略
-        sampling: {
-            // 不录制鼠标移动事件
-            mousemove: false,
-            // 定义不录制的鼠标交互事件类型，可以细粒度的开启或关闭对应交互录制
-            mouseInteraction: {
-                MouseUp: false,
-                MouseDown: false,
-                Click: false,
-                ContextMenu: false,
-                DblClick: false,
-                Focus: false,
-                Blur: false,
-                TouchStart: false,
-                TouchEnd: false,
-            },
-            // 设置滚动事件的触发频率
-            scroll: 150, // 每 150ms 最多触发一次
-            media: 800,
-            // 设置输入事件的录制时机
-            input: 'last' // 连续输入时，只录制最终值
-        },
-        slimDOMOptions: {
-            script: false,
-            comment: false,
-            headFavicon: false,
-            headWhitespace: false,
-            headMetaDescKeywords: false,
-            headMetaSocial: false,
-            headMetaRobots: false,
-            headMetaHttpEquiv: false,
-            headMetaAuthorship: false,
-            headMetaVerification: false,
-        }
-    });
-}
-
 const CO2WaveformRealData = () => {
     const bucketName = 'co2-serial-record-bucket';
     const {globalState, setGlobalState} = useGlobalState();
@@ -205,7 +147,7 @@ const CO2WaveformRealData = () => {
     const stop = async () => {
         const endTime = new Date();
         const startTime = globalState.co2WaveformData.recordDuration.startTime;
-        const fileName = getCO2RecordMinioObjectName(startTime, endTime);
+        const fileName = getRecordMinioObjectName(startTime, endTime);
 
         // 停止录制
         if (recordingRef.current) {

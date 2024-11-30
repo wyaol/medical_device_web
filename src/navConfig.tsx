@@ -41,7 +41,8 @@ const items: MenuItem[] = [
     icon: <BarChartOutlined/>,
     label: '回放记录',
     children: [
-      {key: '3-1', label: <Link to="/record-player/co2-serial">CO2记录回放</Link>}
+      {key: '3-1', label: <Link to="/record-player/co2-serial">CO2记录回放</Link>},
+      {key: '3-2', label: <Link to="/record-player/brain-waves">脑电波记录回放</Link>}
     ]
   },
   {

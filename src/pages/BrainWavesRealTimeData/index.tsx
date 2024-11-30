@@ -1,27 +1,56 @@
 import ReactEcharts from "echarts-for-react";
-import {useEffect, useRef} from 'react';
+import {useEffect, useRef, useState} from 'react';
 import {useGlobalState} from '../../config/GlobalStateContext';
-import {Flex} from "antd";
+import {Flex, Button, message, Modal, List, Tag} from "antd";
+import {AxiosResponse} from 'axios';
+import storage from '../../storage';
+import {
+  scanBrainWavesDevice,
+  connectBrainWavesDevice,
+  disconnectBrainWavesDevice,
+  startDataCollector,
+  stopDataCollector
+} from '../../service/brainWavesService';
+import {startRecord, compressEvents, getRecordMinioObjectName, generateRandomString, categories} from '../../utils'
+import {putObjectByPresignedUrl} from '../../service/objectStoreService'
 
-const generateRandomString = (length: number) => {
-  const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-  let result = '';
-  for (let i = 0; i < length; i++) {
-    const randomIndex = Math.floor(Math.random() * characters.length);
-    result += characters.charAt(randomIndex);
-  }
-  return result;
-}
-
-const categories = (len: number): string[] => {
-  let res: string[] = [];
-  while (len--) {
-    res.push(generateRandomString(10));
-  }
-  return res;
-}
-
+const EventMarkMap: React.FC<{ data: { IC: number, DT: number, DV: number } }> = ({data}) => {
+  return (
+    <Flex gap="0 10px" justify={'center'}>
+      <Flex vertical={true}>
+        <Tag color="#2db7f5" style={{
+          height: '40%', display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          fontSize: '20px'
+        }}>{data.IC.toFixed(0)}</Tag>
+        <Tag color="#2db7f5" style={{height: '30%'}}>事件类型（IC）</Tag>
+      </Flex>
+      <Flex vertical={true}>
+        <Tag color="#87d068" style={{
+          height: '40%', display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          fontSize: '20px'
+        }}>{data.DT.toFixed(0)}</Tag>
+        <Tag color="#87d068" style={{height: '30%'}}>药物类型（DT）</Tag>
+      </Flex>
+      <Flex vertical={true}>
+        <Tag color="#108ee9" style={{
+          height: '40%', display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          fontSize: '20px'
+        }}>{data.DV.toFixed(3)}</Tag>
+        <Tag color="#108ee9" style={{height: '30%'}}>药物用量（DV）</Tag>
+      </Flex>
+    </Flex>
+  );
+};
 const renderEEGParamsOption = (data: any, len: number) => ({
+  grid: {
+    bottom: '5%', // 下边距
+  },
   xAxis: {
     show: false,
     type: 'category',
@@ -35,15 +64,40 @@ const renderEEGParamsOption = (data: any, len: number) => ({
       data: ['qCON（镇静指数）', 'qNOX（伤害刺激指数）', 'BS（爆发抑制比）'],
       top: 'top',
       orient: 'horizontal',
-      itemGap: 10, // 调整图例项之间的间距
-      itemWidth: 20, // 调整图例项的宽度
+      itemGap: 10, // 增加图例项之间的间距
+      itemWidth: 20, // 增加图例项的宽度
+      textStyle: {
+        fontSize: 10, // 调整字体大小
+        padding: [0, 10], // 增加左右内边距
+        width: 100, // 设置文本的固定宽度
+        overflow: 'ellipsis', // 超出部分用省略号表示
+      },
     },
     {
       data: ['EMG（肌电指数）', 'SQI（信号质量）', 'FREQ（EEG 频率）'],
       top: '15',
       orient: 'horizontal',
-      itemGap: 10, // 调整图例项之间的间距
-      itemWidth: 20, // 调整图例项的宽度
+      itemGap: 10, // 增加图例项之间的间距
+      itemWidth: 20, // 增加图例项的宽度
+      textStyle: {
+        fontSize: 10, // 调整字体大小
+        padding: [0, 10], // 增加左右内边距
+        width: 100, // 设置文本的固定宽度
+        overflow: 'ellipsis', // 超出部分用省略号表示
+      },
+    },
+    {
+      data: ['PImp（电极的皮肤阻抗）', 'RImp（电极的皮肤阻抗）', 'NImp（电极的皮肤阻抗）'],
+      top: '30',
+      orient: 'horizontal',
+      itemGap: 10, // 增加图例项之间的间距
+      itemWidth: 20, // 增加图例项的宽度
+      textStyle: {
+        fontSize: 10, // 调整字体大小
+        padding: [0, 10], // 增加左右内边距
+        width: 100, // 设置文本的固定宽度
+        overflow: 'ellipsis', // 超出部分用省略号表示
+      },
     }
   ],
   series: [
@@ -89,6 +143,27 @@ const renderEEGParamsOption = (data: any, len: number) => ({
       smooth: true,
       showSymbol: false,
     },
+    {
+      name: 'PImp（电极的皮肤阻抗）',
+      data: data['PImp'],
+      type: 'line',
+      smooth: true,
+      showSymbol: false,
+    },
+    {
+      name: 'RImp（电极的皮肤阻抗）',
+      data: data['RImp'],
+      type: 'line',
+      smooth: true,
+      showSymbol: false,
+    },
+    {
+      name: 'NImp（电极的皮肤阻抗）',
+      data: data['NImp'],
+      type: 'line',
+      smooth: true,
+      showSymbol: false,
+    },
   ],
   tooltip: {
     trigger: 'axis',
@@ -100,7 +175,7 @@ const renderEEGParamsOption = (data: any, len: number) => ({
     }
   },
   toolbox: {
-    show: true,
+    show: false,
     feature: {
       dataView: {readOnly: false},
       restore: {},
@@ -162,7 +237,7 @@ const renderPPGParamsOption = (data: any, len: number) => ({
     }
   },
   toolbox: {
-    show: true,
+    show: false,
     feature: {
       dataView: {readOnly: false},
       restore: {},
@@ -171,15 +246,12 @@ const renderPPGParamsOption = (data: any, len: number) => ({
   },
 })
 
-const renderWavesOption = (data: any, len: number, name: string) => ({
-  title: {
-    text: name, // 标题文本
-    left: 'center', // 标题位置，可以是 'left', 'center', 'right' 或具体的像素值
-    top: 'top', // 标题位置，可以是 'top', 'middle', 'bottom' 或具体的像素值
-    textStyle: {
-      fontSize: 18, // 标题字体大小
-      color: '#333' // 标题颜色
-    }
+const renderWavesOption = (data: any, len: number) => ({
+  grid: {
+    top: '8%',   // 上边距
+    bottom: '5%', // 下边距
+    left: '5%',   // 左边距
+    right: '12%'   // 右边距
   },
   xAxis: {
     show: false,
@@ -193,7 +265,6 @@ const renderWavesOption = (data: any, len: number, name: string) => ({
   },
   series: [
     {
-      name: name,
       data: data,
       type: 'line',
       showSymbol: false,
@@ -211,103 +282,349 @@ const renderWavesOption = (data: any, len: number, name: string) => ({
     }
   },
   toolbox: {
-    show: true,
+    show: false,
     feature: {
       dataView: {readOnly: false},
       restore: {},
       saveAsImage: {}
     }
   },
+  animation: false, // 禁用了图表的所有动画效果。
+  animationDuration: 0, // 设置了动画的持续时间为 0 毫秒，即使启用了动画，也不会有任何动画效果
+  animationEasing: 'cubicInOut'
 })
 const BrainWavesRealTimeData = () => {
-  const {globalState} = useGlobalState();
-  const eegParamsChartRef = useRef(null);
+  const {globalState, setGlobalState} = useGlobalState();
+  const eegLeftParamsChartRef = useRef(null);
+  const eegRightParamsChartRef = useRef(null);
   const eegLeftWavesChartRef = useRef(null);
   const eegRightWavesChartRef = useRef(null);
   const ppgParamsChartRef = useRef(null);
   const ppgLeftWavesChartRef = useRef(null);
-  const ppgRightWavesChartRef = useRef(null);
+  const recordingRef = useRef<any>(null);
+  const eventsRef = useRef<any[]>([]);
+  const elementsRef = useRef<NodeListOf<HTMLElement>>(document.querySelectorAll('.rr-block') as NodeListOf<HTMLElement>);
+  const contextMenuListenerRef = useRef<(e: MouseEvent) => void>();
+  const [modelVisible, setModelVisible] = useState<boolean>(false);
+  const [indicators, setIndicators] = useState<{ IC: number; DT: number; DV: number; }>({IC: 0, DT: 0, DV: 0});
+  const [collectStatus, setCollectStatus] = useState<boolean>(false);
+  const [devices, setDevices] = useState<Record<string, string>[]>([]);
+  const [scanLoading, setScanLoading] = useState<boolean>(false);
+  const [connectLoading, setConnectLoading] = useState<boolean>(false);
+  const [connectedDevicePort, setConnectedDevicePort] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
+  const start = async () => {
+    const startTime = new Date();
+    await startDataCollector(storage.deviceId)
+      .then(() => {
+        setGlobalState({
+          ...globalState,
+          co2WaveformData: {
+            ...globalState.co2WaveformData,
+            recordDuration: {
+              ...globalState.co2WaveformData.recordDuration,
+              startTime: startTime,
+              endTime: null
+            }
+          }
+        })
+        // 隐藏不必要的元素
+        elementsRef.current.forEach(element => {
+          element.style.display = 'none';
+        });
+        // 开始录制
+        recordingRef.current = startRecord(eventsRef.current);
+      })
+      .catch((error: Error) => {
+        message.error(error.message);
+      })
+  }
+  const stop = async () => {
+    const endTime = new Date();
+    const startTime = globalState.co2WaveformData.recordDuration.startTime;
+    const fileName = getRecordMinioObjectName(startTime, endTime);
+
+    // 停止录制
+    if (recordingRef.current) {
+      recordingRef.current();
+    }
+    // 复原元素
+    elementsRef.current.forEach(element => {
+      element.style.display = 'block';
+    });
+    const presignedUrl = await stopDataCollector(storage.deviceId, startTime, endTime, fileName)
+    setGlobalState({
+      ...globalState,
+      co2WaveformData: {
+        ...globalState.co2WaveformData,
+        recordDuration: {
+          ...globalState.co2WaveformData.recordDuration,
+          startTime: null,
+          endTime: null,
+        }
+      }
+    })
+    const data = compressEvents(eventsRef.current)
+    if (data) {
+      await putObjectByPresignedUrl(presignedUrl, fileName, data);
+    }
+  }
 
   const len = 20;
 
   useEffect(() => {
-    // @ts-ignore
-    eegParamsChartRef?.current?.getEchartsInstance().setOption(renderEEGParamsOption(globalState.BrainWaves.eegParamsData, len));
-  }, [globalState.BrainWaves.eegParamsData])
+    setIndicators({
+      IC: globalState.brainWavesData.eventMarkData['IC'],
+      DT: globalState.brainWavesData.eventMarkData['DT'],
+      DV: globalState.brainWavesData.eventMarkData['DV']
+    })
+  }, [globalState.brainWavesData.eventMarkData])
   useEffect(() => {
     // @ts-ignore
-    eegLeftWavesChartRef?.current?.getEchartsInstance().setOption(renderWavesOption(globalState.BrainWaves.eegLeftWavesData));
-  }, [globalState.BrainWaves.eegLeftWavesData])
+    eegLeftParamsChartRef?.current?.getEchartsInstance().setOption(renderEEGParamsOption(globalState.brainWavesData.eegLeftParamsData, len));
+  }, [globalState.brainWavesData.eegLeftParamsData])
   useEffect(() => {
     // @ts-ignore
-    eegRightWavesChartRef?.current?.getEchartsInstance().setOption(renderWavesOption(globalState.BrainWaves.eegRightWavesData));
-  }, [globalState.BrainWaves.eegRightWavesData])
+    eegRightParamsChartRef?.current?.getEchartsInstance().setOption(renderEEGParamsOption(globalState.brainWavesData.eegRightParamsData, len));
+  }, [globalState.brainWavesData.eegRightParamsData])
   useEffect(() => {
     // @ts-ignore
-    ppgParamsChartRef?.current?.getEchartsInstance().setOption(renderPPGParamsOption(globalState.BrainWaves.ppgParamsData, len));
-  }, [globalState.BrainWaves.ppgParamsData])
+    eegLeftWavesChartRef?.current?.getEchartsInstance().setOption(renderWavesOption(globalState.brainWavesData.eegLeftWavesData));
+  }, [globalState.brainWavesData.eegLeftWavesData])
+  useEffect(() => {
+    // @ts-ignore
+    eegRightWavesChartRef?.current?.getEchartsInstance().setOption(renderWavesOption(globalState.brainWavesData.eegRightWavesData));
+  }, [globalState.brainWavesData.eegRightWavesData])
+  useEffect(() => {
+    // @ts-ignore
+    ppgParamsChartRef?.current?.getEchartsInstance().setOption(renderPPGParamsOption(globalState.brainWavesData.ppgParamsData, len));
+  }, [globalState.brainWavesData.ppgParamsData])
 
   useEffect(() => {
     // @ts-ignore
-    ppgLeftWavesChartRef?.current?.getEchartsInstance().setOption(renderWavesOption(globalState.BrainWaves.ppgLeftWavesData));
-  }, [globalState.BrainWaves.ppgLeftWavesData]);
+    ppgLeftWavesChartRef?.current?.getEchartsInstance().setOption(renderWavesOption(globalState.brainWavesData.ppgWavesData));
+  }, [globalState.brainWavesData.ppgWavesData]);
+
 
   useEffect(() => {
-    // @ts-ignore
-    ppgRightWavesChartRef?.current?.getEchartsInstance().setOption(renderWavesOption(globalState.BrainWaves.ppgRightWavesData));
-  }, [globalState.BrainWaves.ppgRightWavesData]);
+    if (globalState.brainWavesData.recordDuration.startTime !== null) {
+      setCollectStatus(true);
+    } else {
+      setCollectStatus(false);
+    }
+  }, [globalState.brainWavesData.recordDuration.startTime])
 
-  return (<div>
+  useEffect(() => {
+    setDevices(globalState.BrainWavesDevice.devices);
+    setConnectedDevicePort(globalState.BrainWavesDevice.connect.address);
+  }, [globalState.BrainWavesDevice.devices, globalState.BrainWavesDevice.connect.address])
 
-    <Flex vertical={false}>
-      <ReactEcharts
-        notMerge={true}
-        ref={eegParamsChartRef}
-        option={renderEEGParamsOption(globalState.BrainWaves.eegParamsData, 20)}
-        style={{height: '440px', width: '40%'}}
-      />
+  useEffect(() => {
+    setDevices(globalState.BrainWavesDevice.devices);
+    setScanLoading(false);
+  }, [globalState.BrainWavesDevice.devices])
 
-      <Flex style={{height: '440px', width: '60%'}} vertical={true}>
+  useEffect(() => {
+    if (storage.plusWave.connect.message !== '') {
+      alert(globalState.BrainWavesDevice.connect.message)
+    }
+    setConnectedDevicePort(globalState.BrainWavesDevice.connect.address);
+    setConnectLoading(false);
+  }, [globalState.BrainWavesDevice.connect])
+
+  useEffect(() => {
+    const data = globalState.brainWavesData.eventMarkData
+    setIndicators({IC: data['IC'], DT: data['DT'], DV: data['DV']})
+  }, [globalState.brainWavesData.eventMarkData])
+
+  useEffect(() => {
+    // 在组件挂载时禁用鼠标右键
+    const handleContextMenu = (e: MouseEvent) => e.preventDefault();
+    document.addEventListener('contextmenu', handleContextMenu);
+
+    // 存储监听器以便在卸载时移除
+    contextMenuListenerRef.current = handleContextMenu;
+
+    // 清理函数，在组件卸载时移除事件监听器
+    return () => {
+      if (contextMenuListenerRef.current) {
+        document.removeEventListener('contextmenu', contextMenuListenerRef.current);
+      }
+    };
+  }, []); // 空依赖数组确保此effect仅运行一次
+
+  return (
+    <div style={{height: '880px', width: '100%'}}>
+      <Flex vertical={false} style={{height: '9%'}} justify={'space-between'}>
+        <EventMarkMap data={indicators}></EventMarkMap>
+        <Flex>
+          <Button
+            disabled={collectStatus}
+            type="primary"
+            onClick={() => setModelVisible(true)}
+            style={{marginRight: '50px'}}
+          >设备管理</Button>
+          <Button
+            disabled={collectStatus}
+            onClick={() => start()}
+          >开始记录</Button>
+          <Button
+            onClick={() => stop()}
+            style={{marginLeft: '20px'}}
+          >停止记录</Button>
+        </Flex>
+        <Modal
+          title={(
+            <div style={{display: 'flex', justifyContent: 'center', alignItems: 'center'}}>设备管理</div>)}
+          width={800}
+          style={{top: '20vh'}}
+          open={modelVisible}
+          onOk={() => {
+            setModelVisible(false)
+          }}
+          onCancel={() => {
+            setModelVisible(false)
+          }}
+        >
+          <Flex
+            gap="middle"
+            vertical={false}
+            justify="space-between" // 将内容水平分布
+            align="center" // 垂直居中对齐
+          >
+            <p>可连接脑电波设备列表</p>
+            <Button type="primary"
+                    style={{marginLeft: '50px'}}
+                    loading={scanLoading}
+                    onClick={async () => {
+                      setScanLoading(true);
+                      await scanBrainWavesDevice(storage.deviceId)
+                        .then((res: AxiosResponse<any>) => {
+                          if (res.status !== 200) {
+                            throw new Error('Scan failed');
+                          }
+                        })
+                        .catch((err) => {
+                          setScanLoading(false);
+                          setError(err.message);
+                        });
+                    }}
+            >设备扫描</Button>
+          </Flex>
+          <List
+            itemLayout="horizontal"
+            dataSource={devices}
+            renderItem={(item) => (
+              <List.Item
+                key={item.address}
+                actions={[
+                  (connectedDevicePort === null || connectedDevicePort === item.address) &&
+                  (<Button
+                    loading={connectLoading}
+                    danger={connectedDevicePort === item.address}
+                    onClick={async () => {
+                      if (connectedDevicePort === null) {
+                        setConnectLoading(true);
+                        await connectBrainWavesDevice(storage.deviceId, item.address)
+                          .catch((err) => {
+                            setError(err.message);
+                            setConnectLoading(false);
+                          });
+                      } else {
+                        await disconnectBrainWavesDevice(storage.deviceId)
+                          .then((res: AxiosResponse<any>) => {
+                            if (res.status !== 200) {
+                              throw new Error('Disconnect failed');
+                            }
+                            setConnectedDevicePort(null)
+                          })
+                          .catch((err) => {
+                            setError(err.message);
+                          });
+                      }
+                    }}
+                  >{connectedDevicePort !== null && connectedDevicePort === item.address ? "断开连接" : "连接"}
+                  </Button>)
+                ]}
+              >
+                <List.Item.Meta
+                  title={`名称：${item.name}`}
+                  description={<p>地址：{item.address}</p>}
+                />
+              </List.Item>
+            )}
+          />
+        </Modal>
+      </Flex>
+      <Flex vertical={false} style={{height: '27%'}}>
+        <Flex style={{height: '100%', width: '60%'}} vertical={true}>
+          <span
+            style={{
+              height: '10%', width: '100%', textAlign: 'center',
+              fontSize: '18px', color: '#333', fontWeight: 'bold'
+            }}
+          >EEG waves - left</span>
+          <ReactEcharts
+            notMerge={true}
+            ref={eegLeftWavesChartRef}
+            option={renderWavesOption(globalState.brainWavesData.eegLeftWavesData, 256)}
+            style={{height: '90%', width: '100%'}}
+          />
+        </Flex>
         <ReactEcharts
           notMerge={true}
-          ref={eegLeftWavesChartRef}
-          option={renderWavesOption(globalState.BrainWaves.eegLeftWavesData, 1024, 'EEG waves - left')}
-          style={{height: '220px', width: '100%'}}
-        />
-        <ReactEcharts
-          notMerge={true}
-          ref={eegRightWavesChartRef}
-          option={renderWavesOption(globalState.BrainWaves.eegRightWavesData, 1024, 'EEG waves - right')}
-          style={{height: '220px', width: '100%'}}
+          ref={eegLeftParamsChartRef}
+          option={renderEEGParamsOption(globalState.brainWavesData.eegLeftParamsData, 20)}
+          style={{height: '100%', width: '40%'}}
         />
       </Flex>
-    </Flex>
-    <Flex vertical={false}>
-      <ReactEcharts
-        notMerge={true}
-        ref={ppgParamsChartRef}
-        option={renderPPGParamsOption(globalState.BrainWaves.ppgParamsData, 20)}
-        style={{height: '440px', width: '40%'}}
-      />
-
-      <Flex style={{height: '440px', width: '60%'}} vertical={true}>
+      <Flex vertical={false} style={{height: '27%'}}>
+        <Flex style={{height: '100%', width: '60%'}} vertical={true}>
+          <span
+            style={{
+              height: '10%', width: '100%', textAlign: 'center',
+              fontSize: '18px', color: '#333', fontWeight: 'bold'
+            }}
+          >EEG waves - right</span>
+          <ReactEcharts
+            notMerge={true}
+            ref={eegRightWavesChartRef}
+            option={renderWavesOption(globalState.brainWavesData.eegRightWavesData, 256)}
+            style={{height: '90%', width: '100%'}}
+          />
+        </Flex>
         <ReactEcharts
           notMerge={true}
-          ref={ppgLeftWavesChartRef}
-          option={renderWavesOption(globalState.BrainWaves.ppgLeftWavesData, 1024, 'PPG waves - left')}
-          style={{height: '220px', width: '100%'}}
+          ref={eegRightParamsChartRef}
+          option={renderEEGParamsOption(globalState.brainWavesData.eegRightParamsData, 20)}
+          style={{height: '100%', width: '40%'}}
         />
+
+      </Flex>
+      <Flex vertical={false} style={{height: '27%'}}>
+        <Flex style={{height: '100%', width: '60%'}} vertical={true}>
+          <span
+            style={{
+              height: '10%', width: '100%', textAlign: 'center',
+              fontSize: '18px', color: '#333', fontWeight: 'bold'
+            }}
+          >PPG waves</span>
+          <ReactEcharts
+            notMerge={true}
+            ref={ppgLeftWavesChartRef}
+            option={renderWavesOption(globalState.brainWavesData.ppgWavesData, 256)}
+            style={{height: '90%', width: '100%'}}
+          />
+        </Flex>
         <ReactEcharts
           notMerge={true}
-          ref={ppgRightWavesChartRef}
-          option={renderWavesOption(globalState.BrainWaves.ppgRightWavesData, 1024, 'PPG waves - right')}
-          style={{height: '220px', width: '100%'}}
+          ref={ppgParamsChartRef}
+          option={renderPPGParamsOption(globalState.brainWavesData.ppgParamsData, 20)}
+          style={{height: '100%', width: '40%'}}
         />
       </Flex>
-    </Flex>
-
-  </div>)
+    </div>)
 }
 
 export default BrainWavesRealTimeData
