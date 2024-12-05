@@ -13,8 +13,9 @@ jobs:
       SSH_PASSWORD: wY74108520
       SERVER_IP: 110.41.165.162
       SERVER_PORT: 2022
-      PROJECT_PATH: /root/medical_device/medical_device_web
-      NGINX_CONF_PATH: /etc/nginx/nginx.conf
+      LOCAL_BUILD_PATH: ./build
+      REMOTE_BUILD_PATH: /var/www/medical_device
+      NGINX_CONF_PATH: /etc/nginx/sites-available/default
 
     steps:
       - name: 检查代码库
@@ -41,14 +42,30 @@ jobs:
           echo "Testing SSH connection to ${{ env.SERVER_IP }} on port ${{ env.SERVER_PORT }}"
           sshpass -p "${{ env.SSH_PASSWORD }}" ssh -o ConnectTimeout=10 -o StrictHostKeyChecking=no -p ${{ env.SERVER_PORT }} root@${{ env.SERVER_IP }} "echo 'Connection successful'"
 
-      - name: 使用rsync同步文件到服务器
+      - name: 同步 build 文件夹到服务器
         run: |
-          sshpass -p "${{ env.SSH_PASSWORD }}" rsync -avz -e "ssh -p ${{ env.SERVER_PORT }} -o StrictHostKeyChecking=no" ./ root@${{ env.SERVER_IP }}:${{ env.PROJECT_PATH }}
+          sshpass -p "${{ env.SSH_PASSWORD }}" rsync -avz --delete -e "ssh -p ${{ env.SERVER_PORT }} -o StrictHostKeyChecking=no" ${{ env.LOCAL_BUILD_PATH }}/ root@${{ env.SERVER_IP }}:${{ env.REMOTE_BUILD_PATH }}
 
-      - name: 确保目标目录存在并具有适当权限
+      - name: 设置目录权限
         run: |
-          sshpass -p "${{ env.SSH_PASSWORD }}" ssh -o ConnectTimeout=10 -o StrictHostKeyChecking=no -p ${{ env.SERVER_PORT }} root@${{ env.SERVER_IP }} "mkdir -p ${{ env.PROJECT_PATH }} && chmod 700 ${{ env.PROJECT_PATH }}"
+          sshpass -p "${{ env.SSH_PASSWORD }}" ssh -o StrictHostKeyChecking=no -p ${{ env.SERVER_PORT }} root@${{ env.SERVER_IP }} "chown -R www-data:www-data ${{ env.REMOTE_BUILD_PATH }} && chmod -R 755 ${{ env.REMOTE_BUILD_PATH }}"
 
-      - name: 更新 Nginx 配置
+      - name: 更新 Nginx 配置并重启
         run: |
-          sshpass -p "${{ env.SSH_PASSWORD }}" ssh -o ConnectTimeout=10 -o StrictHostKeyChecking=no -p ${{ env.SERVER_PORT }} root@${{ env.SERVER_IP }} "sed -i 's#/var/www/html#${{ env.PROJECT_PATH }}#' ${{ env.NGINX_CONF_PATH }} && service nginx reload"
+          sshpass -p "${{ env.SSH_PASSWORD }}" ssh -o StrictHostKeyChecking=no -p ${{ env.SERVER_PORT }} root@${{ env.SERVER_IP }} "
+          echo '
+          server {
+              listen 80;
+              server_name ${{ env.SERVER_IP }};
+                
+              root ${{ env.REMOTE_BUILD_PATH }};
+              index index.html;
+                
+              location / {
+                  try_files \$uri /index.html;
+              }
+          }
+          ' > ${{ env.NGINX_CONF_PATH }} &&
+          ln -sf ${{ env.NGINX_CONF_PATH }} /etc/nginx/sites-enabled/default &&
+          nginx -t &&
+          systemctl reload nginx"
