@@ -16,6 +16,7 @@ const items: MenuItem[] = [
       {key: '1-1', label: <Link to="/real-time-data/plus-wave">脉搏波</Link>},
       {key: '1-2', label: <Link to="/real-time-data/heart-rate">心率</Link>},
       {key: '1-3', label: <Link to="/real-time-data/co2-waveform">CO2</Link>},
+      {key: '1-4', label: <Link to="/real-time-data/brain-waves">脑电波</Link>},
     ],
   },
   {
@@ -40,7 +41,8 @@ const items: MenuItem[] = [
     icon: <BarChartOutlined/>,
     label: '回放记录',
     children: [
-      {key: '3-1', label: <Link to="/record-player/co2-serial">CO2记录回放</Link>}
+      {key: '3-1', label: <Link to="/record-player/co2-serial">CO2记录回放</Link>},
+      {key: '3-2', label: <Link to="/record-player/brain-waves">脑电波记录回放</Link>}
     ]
   },
   {

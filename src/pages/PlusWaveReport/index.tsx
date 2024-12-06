@@ -26,7 +26,15 @@ const PlusWaveReport = () => {
   });
   const [periodId, setPeriodId] = useState<number | null>(null);
   const [periodIdToGenReport, setPeriodIdToGenReport] = useState<number | null>(null);
-  const [heartRateVariabilityTimeDomainMetrics, setHeartRateVariabilityTimeDomainMetrics] = useState<any>({})
+  const [heartRateVariabilityTimeDomainMetrics, setHeartRateVariabilityTimeDomainMetrics] = useState<{
+    avg: number, sd: number, cv: number, max: number, min: number, ld: number,
+    fm: number, pm: number, dm: number, sc: number, ic: number, ac: number,
+    xgd: number, ygd: number, mrd: number, syd: number
+  }>({
+    avg: 0, sd: 0, cv: 0, max: 0, min: 0, ld: 0,
+    fm: 0, pm: 0, dm: 0, sc: 0, ic: 0, ac: 0,
+    xgd: 0, ygd: 0, mrd: 0, syd: 0
+  })
   const [heartRateVariabilityFrequencyDomainMetrics, setHeartRateVariabilityFrequencyDomainMetrics] = useState<any>({})
 
   useEffect(() => {
@@ -84,9 +92,9 @@ const PlusWaveReport = () => {
 
         <div style={{marginTop: '30px'}}>
           <HeartRateVariabilityTimeDomainMetrics
-            heartRateVariabilityTimeDomainMetrics={heartRateVariabilityTimeDomainMetrics}/>
+              heartRateVariabilityTimeDomainMetrics={heartRateVariabilityTimeDomainMetrics}/>
           <HeartRateVariabilityFrequencyDomainMetrics
-            heartRateVariabilityFrequencyDomainMetrics={heartRateVariabilityFrequencyDomainMetrics}/>
+              heartRateVariabilityFrequencyDomainMetrics={heartRateVariabilityFrequencyDomainMetrics}/>
         </div>
 
         <div className="report-box">

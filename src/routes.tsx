@@ -7,6 +7,8 @@ import PatientSelect from './pages/PatientSelect';
 import CO2WaveformRealData from './pages/CO2WaveformRealData';
 import CO2DataRecord from './pages/CO2DataRecord';
 import CO2WaveReport from './pages/CO2WaveReport';
+import BrainWavesRealTimeData from './pages/BrainWavesRealTimeData'
+import BrainWavesRecord from  './pages/BrainWavesRecord'
 
 
 const routeConfig = [
@@ -23,6 +25,10 @@ const routeConfig = [
     element: <CO2WaveformRealData />,
   },
   {
+    path: '/real-time-data/brain-waves',
+    element: <BrainWavesRealTimeData />,
+  },
+  {
     path: '/analyse-report/plus-wave',
     element: <PlusWaveReport />,
   },
@@ -33,6 +39,10 @@ const routeConfig = [
   {
     path: '/record-player/co2-serial',
     element: <CO2DataRecord />,
+  },
+  {
+    path: '/record-player/brain-waves',
+    element: <BrainWavesRecord />,
   },
   {
     path: '/patient-management/create',

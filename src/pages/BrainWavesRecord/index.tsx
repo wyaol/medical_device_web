@@ -1,24 +1,14 @@
 import {Button, message, Select, Flex} from 'antd';
 import React, {useCallback, useEffect, useState} from 'react';
-import {getAllDataCollectionPeriods, getCO2DataRecordPresignedUrl} from '../../service/co2DataService';
+import {getAllDataCollectionPeriods, getBrainWavesRecordPresignedUrl} from '../../service/brainWavesService';
 import rrwebPlayer from 'rrweb-player';
 import {getObjectByPresignedUrl} from '../../service/objectStoreService'
-import Gzip from 'gzip-js';
+import {decompressorEvents} from "../../utils";
 import 'rrweb/dist/rrweb.min.css';
 import 'rrweb-player/dist/style.css';
 
-const decompressorEvents = async (blob: Blob) => {
-  try {
-    const arrayBuffer = new Uint8Array(await blob.arrayBuffer());
-    const decompressedData = Gzip.unzip(arrayBuffer);
-    const decompressedString = new TextDecoder().decode(new Uint8Array(decompressedData));
-    return JSON.parse(decompressedString);
-  } catch (error) {
-    console.error('Error decompressing events:', error);
-    return null;
-  }
-}
-const CO2DataRecord = () => {
+
+const BrainWavesRecord = () => {
   const recordContainer = document.querySelector('.co2-record-container') as HTMLElement;
   const playerContainer = document.querySelector('.co2-player-container') as HTMLElement;
   const [dataCollectionPeriods, setDataCollectionPeriods] = useState([]);
@@ -37,7 +27,7 @@ const CO2DataRecord = () => {
       message.warning('请先选择一个采集时间段');
       return;
     }
-    const presignedUrl = await getCO2DataRecordPresignedUrl(filePath);
+    const presignedUrl = await getBrainWavesRecordPresignedUrl(filePath);
     const recordBlob: Blob = await getObjectByPresignedUrl(presignedUrl);
     const events = await decompressorEvents(recordBlob);
     const player = new rrwebPlayer({
@@ -76,4 +66,4 @@ const CO2DataRecord = () => {
   );
 };
 
-export default CO2DataRecord;
+export default BrainWavesRecord;
