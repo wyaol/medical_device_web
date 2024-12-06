@@ -1,0 +1,71 @@
+name: medical_device_web 项目文件对应的 CI/CD 工作流
+
+on:
+  push:
+    branches:
+      - '*'
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    env:
+      SSH_PASSWORD: wY74108520
+      SERVER_IP: 110.41.165.162
+      SERVER_PORT: 2022
+      LOCAL_BUILD_PATH: ./build
+      REMOTE_BUILD_PATH: /var/www/medical_device
+      NGINX_CONF_PATH: /etc/nginx/sites-available/default
+
+    steps:
+      - name: 检查代码库
+        uses: actions/checkout@v4
+
+      - name: 安装 Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '21.6'
+
+      - name: 安装所需依赖
+        run: npm ci
+
+      - name: 搭建项目(临时CI=false)
+        run: CI=false npm run build
+
+      - name: 安装 rsync,sshpass
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y rsync sshpass
+
+      - name: 测试SSH连接
+        run: |
+          echo "Testing SSH connection to ${{ env.SERVER_IP }} on port ${{ env.SERVER_PORT }}"
+          sshpass -p "${{ env.SSH_PASSWORD }}" ssh -o ConnectTimeout=10 -o StrictHostKeyChecking=no -p ${{ env.SERVER_PORT }} root@${{ env.SERVER_IP }} "echo 'Connection successful'"
+
+      - name: 同步 build 文件夹到服务器
+        run: |
+          sshpass -p "${{ env.SSH_PASSWORD }}" rsync -avz --delete -e "ssh -p ${{ env.SERVER_PORT }} -o StrictHostKeyChecking=no" ${{ env.LOCAL_BUILD_PATH }}/ root@${{ env.SERVER_IP }}:${{ env.REMOTE_BUILD_PATH }}
+
+      - name: 设置目录权限
+        run: |
+          sshpass -p "${{ env.SSH_PASSWORD }}" ssh -o StrictHostKeyChecking=no -p ${{ env.SERVER_PORT }} root@${{ env.SERVER_IP }} "chown -R www-data:www-data ${{ env.REMOTE_BUILD_PATH }} && chmod -R 755 ${{ env.REMOTE_BUILD_PATH }}"
+
+      - name: 更新 Nginx 配置并重启
+        run: |
+          sshpass -p "${{ env.SSH_PASSWORD }}" ssh -o StrictHostKeyChecking=no -p ${{ env.SERVER_PORT }} root@${{ env.SERVER_IP }} "
+          echo '
+          server {
+              listen 80;
+              server_name ${{ env.SERVER_IP }};
+                
+              root ${{ env.REMOTE_BUILD_PATH }};
+              index index.html;
+                
+              location / {
+                  try_files \$uri /index.html;
+              }
+          }
+          ' > ${{ env.NGINX_CONF_PATH }} &&
+          ln -sf ${{ env.NGINX_CONF_PATH }} /etc/nginx/sites-enabled/default &&
+          nginx -t &&
+          systemctl reload nginx"
